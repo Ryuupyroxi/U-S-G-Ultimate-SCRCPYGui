@@ -1,0 +1,60 @@
+{
+  "name": "ultimate-scrcpygui",
+  "version": "1.0.0-alpha",
+  "productName": "UltimateSCRCPYGui",
+  "description": "UltimateSCRCPYGui - a custom Scrcpy GUI build with one-click wireless ADB for Android 10 and below",
+  "author": "Simon Ma <simon@tomotoes.com>",
+  "homepage": "https://github.com/Ryuupyroxi/U-S-G-Ultimate-SCRCPYGui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ryuupyroxi/U-S-G-Ultimate-SCRCPYGui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ryuupyroxi/U-S-G-Ultimate-SCRCPYGui/issues"
+  },
+  "desktopName": "ultimate-scrcpy.desktop",
+  "license": "MIT",
+  "private": true,
+  "main": "out/main/main.js",
+  "dependencies": {
+    "vue": "^3.5.44"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build:linux": "electron-builder --linux AppImage",
+    "build:windows": "electron-builder --win portable nsis",
+    "pack:asar": "asar pack out resources/app.asar"
+  },
+  "build": {
+    "appId": "com.ultimate.scrcpygui",
+    "productName": "UltimateSCRCPYGui",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main/**",
+      "preload/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
