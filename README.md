@@ -17,6 +17,7 @@ A custom build of the [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) (v2
 - **Smart tray icon** — green while scrcpy is running, orange when devices are connected, red when none are. Right-click for per-device start/stop.
 - **Updater** — checks and applies updates for the app itself (GitHub releases), bundled scrcpy and bundled adb, and can rebuild the AppImage in place.
 - **Config export** — Settings → General: JSON, `.sh`, `.bat` or `.command`.
+- **Settings → Panels** — drag to reorder the sidebar panels, toggle any panel's visibility, or reset to the defaults. Your layout persists across restarts.
 - **Collapsible sidebar**, collapsible panels, app labels beside package names.
 
 ## Requirements

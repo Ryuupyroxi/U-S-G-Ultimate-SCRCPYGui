@@ -1213,7 +1213,7 @@ async function findSquashfsOffset(file) {
     if (runtimeEnd <= 0) return -1;
     const buffer = Buffer.alloc(8 * 1024 * 1024);
     const { bytesRead } = await handle.read(buffer, 0, buffer.length, runtimeEnd);
-    const index = buffer.indexOf("hsqs", 0, bytesRead);
+    const index = buffer.subarray(0, bytesRead).indexOf("hsqs");
     return index >= 0 ? runtimeEnd + index : -1;
   } finally {
     await handle.close();
@@ -1950,6 +1950,8 @@ function defaultPersistedConfig(locale2) {
     swipePanel: false,
     navBar: false,
     qrPairing: false,
+    panelOrder: PANEL_IDS.slice(),
+    panelVisibility: { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
     scripts: {},
     muteNotifications: false,
     minimizeToTray: false,
@@ -2027,6 +2029,8 @@ function configView(config) {
     swipePanel: config.appearance.swipePanel,
     navBar: config.appearance.navBar,
     qrPairing: config.appearance.qrPairing,
+    panelOrder: config.appearance.panelOrder,
+    panelVisibility: config.appearance.panelVisibility,
     scripts: config.defaults.scripts,
     muteNotifications: config.appearance.muteNotifications,
     minimizeToTray: config.defaults.minimizeToTray,
@@ -2490,6 +2494,28 @@ function themeValue(value, fallback) {
   if (fallback) return fallback;
   return "light";
 }
+const PANEL_IDS = ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
+const panelIds = /* @__PURE__ */ new Set(PANEL_IDS);
+function panelOrderValue(value, fallback) {
+  const base = Array.isArray(fallback) ? fallback.slice() : PANEL_IDS.slice();
+  if (!Array.isArray(value)) return base;
+  const seen = /* @__PURE__ */ new Set();
+  const ordered = [];
+  for (const item of value) {
+    if (typeof item !== "string" || seen.has(item) || !panelIds.has(item)) continue;
+    seen.add(item);
+    ordered.push(item);
+  }
+  for (const id of PANEL_IDS) if (!seen.has(id)) ordered.push(id);
+  return ordered;
+}
+function panelVisibilityValue(value, fallback) {
+  const base = fallback && typeof fallback === "object" && !Array.isArray(fallback) ? fallback : {};
+  const source = object(value === void 0 || value === null ? {} : value, "panelVisibility");
+  const result = {};
+  for (const id of PANEL_IDS) result[id] = source[id] === void 0 ? base[id] !== false : strictBoolean(source[id], `panelVisibility.${id}`);
+  return result;
+}
 const SCRCPY_SCRIPTS = [
   { id: "gaming", label: "Gaming", args: "--no-mipmaps --no-mouse-hover --raw-key-events --disable-screensaver" },
   { id: "battery-saver", label: "Battery saver", args: "--disable-screensaver --no-clipboard-autosync --no-terminal-title --no-cleanup" },
@@ -2623,6 +2649,8 @@ function validatePersistedConfig(value) {
     swipePanel: strictBoolean(source.swipePanel, "config.swipePanel"),
     navBar: strictBoolean(source.navBar, "config.navBar"),
     qrPairing: strictBoolean(source.qrPairing, "config.qrPairing"),
+    panelOrder: panelOrderValue(source.panelOrder),
+    panelVisibility: panelVisibilityValue(source.panelVisibility),
     update: updateSection(source.update, "config.update"),
     toolkit: toolkitSection(source.toolkit, "config.toolkit"),
     muteNotifications: strictBoolean(source.muteNotifications, "config.muteNotifications"),
@@ -2706,6 +2734,8 @@ function safeLegacyConfig(value, fallbackLocale) {
       swipePanel: accept(() => strictBoolean(candidate.swipePanel, "legacy.swipePanel"), defaults.swipePanel),
       navBar: accept(() => strictBoolean(candidate.navBar, "legacy.navBar"), defaults.navBar),
       qrPairing: accept(() => strictBoolean(candidate.qrPairing, "legacy.qrPairing"), defaults.qrPairing),
+      panelOrder: accept(() => panelOrderValue(candidate.panelOrder), defaults.panelOrder),
+      panelVisibility: accept(() => panelVisibilityValue(candidate.panelVisibility), defaults.panelVisibility),
       scripts: accept(() => scriptsRecord(candidate.scripts, "legacy.scripts"), defaults.scripts),
       update: accept(() => updateSection(candidate.update, "legacy.update"), defaults.update),
       toolkit: accept(() => toolkitSection(candidate.toolkit, "legacy.toolkit"), defaults.toolkit),
@@ -2765,7 +2795,7 @@ function configFromView(view, revision, previous, now) {
     schemaVersion: 3,
     revision,
     locale: view.locale,
-    appearance: { muteNotifications: view.muteNotifications, theme: view.theme, accentScheme: view.accentScheme, accentReversed: view.accentReversed, swipePanel: view.swipePanel, navBar: view.navBar, qrPairing: view.qrPairing },
+    appearance: { muteNotifications: view.muteNotifications, theme: view.theme, accentScheme: view.accentScheme, accentReversed: view.accentReversed, swipePanel: view.swipePanel, navBar: view.navBar, qrPairing: view.qrPairing, panelOrder: view.panelOrder, panelVisibility: view.panelVisibility },
     update: { checkOnStartup: view.update.checkOnStartup, autoUpdateOnStartup: view.update.autoUpdateOnStartup, skipConfirmation: view.update.skipConfirmation },
     toolkit: { sshEnabled: view.toolkit.sshEnabled, sshHost: view.toolkit.sshHost, sshLocalPort: view.toolkit.sshLocalPort, sshRemotePort: view.toolkit.sshRemotePort, perInstanceTerminal: view.toolkit.perInstanceTerminal, recentCommands: [...view.toolkit.recentCommands], commandUsage: { ...view.toolkit.commandUsage } },
     runtime: { mode: view.runtime.scrcpyPath ? "custom" : "bundled", customScrcpyPath: view.runtime.scrcpyPath },
@@ -2874,7 +2904,7 @@ function validateAppConfigV3(value) {
     schemaVersion: 3,
     revision: integer(source.revision, "configV3.revision"),
     locale: configLocale,
-    appearance: { muteNotifications: strictBoolean(appearance.muteNotifications, "configV3.appearance.muteNotifications"), theme: themeValue(appearance.theme), accentScheme: accentSchemeValue(appearance.accentScheme), accentReversed: strictBoolean(appearance.accentReversed, "configV3.appearance.accentReversed"), swipePanel: strictBoolean(appearance.swipePanel, "configV3.appearance.swipePanel"), navBar: strictBoolean(appearance.navBar, "configV3.appearance.navBar"), qrPairing: strictBoolean(appearance.qrPairing, "configV3.appearance.qrPairing") },
+    appearance: { muteNotifications: strictBoolean(appearance.muteNotifications, "configV3.appearance.muteNotifications"), theme: themeValue(appearance.theme), accentScheme: accentSchemeValue(appearance.accentScheme), accentReversed: strictBoolean(appearance.accentReversed, "configV3.appearance.accentReversed"), swipePanel: strictBoolean(appearance.swipePanel, "configV3.appearance.swipePanel"), navBar: strictBoolean(appearance.navBar, "configV3.appearance.navBar"), qrPairing: strictBoolean(appearance.qrPairing, "configV3.appearance.qrPairing"), panelOrder: panelOrderValue(appearance.panelOrder), panelVisibility: panelVisibilityValue(appearance.panelVisibility) },
     update: updateSection(source.update, "configV3.update"),
     toolkit: toolkitSection(source.toolkit, "configV3.toolkit"),
     runtime: {

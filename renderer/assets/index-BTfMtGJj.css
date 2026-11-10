@@ -296,3 +296,13 @@ h1, h2, h3, h4, .panel-title, .brand-copy strong { font-weight: 700; }
 .toolkit-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .toolkit-chips button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .inline-form select { min-height: 32px; }
+
+/* Settings > Panels: sidebar order + visibility */
+.panel-order-list { display: grid; gap: 7px; }
+.panel-order-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg-subtle); cursor: grab; transition: border-color .15s ease, box-shadow .15s ease, opacity .15s ease; }
+.panel-order-item:hover { border-color: var(--border-hover); }
+.panel-order-item.dragging { opacity: .45; cursor: grabbing; }
+.panel-order-item.drop-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.panel-order-item .drag-handle { color: var(--text-faint); font-size: 13px; user-select: none; }
+.panel-order-item .panel-order-label { flex: 1; font-weight: 600; }
+.panel-order-item .toggle { min-height: 0; }

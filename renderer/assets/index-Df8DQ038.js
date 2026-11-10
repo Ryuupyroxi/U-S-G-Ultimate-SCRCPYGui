@@ -7025,6 +7025,8 @@ function defaultPersistedConfig(locale) {
     swipePanel: false,
     navBar: false,
     qrPairing: false,
+    panelOrder: ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"],
+    panelVisibility: { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
     scripts: {},
     muteNotifications: false,
     update: { checkOnStartup: false, autoUpdateOnStartup: false, skipConfirmation: false },
@@ -7132,6 +7134,12 @@ const en = {
   settingsSection_recording: "Recording",
   settingsSection_geometry: "Window",
   settingsSection_advanced: "Advanced",
+  settingsSection_panels: "Panels",
+  panels: "Panels",
+  panelsHint: "Drag panels to reorder the sidebar. Untick a panel to hide it from the sidebar.",
+  showPanel: "Show",
+  resetPanelOrder: "Reset order",
+  panelOrderReset: "Sidebar order restored.",
   logs: "Logs",
   artifacts: "Artifacts",
   artifactLibrary: "Artifact library",
@@ -7795,6 +7803,12 @@ const zhCN = {
   settingsSection_recording: "录制",
   settingsSection_geometry: "窗口",
   settingsSection_advanced: "高级",
+  settingsSection_panels: "面板",
+  panels: "面板",
+  panelsHint: "拖拽面板可调整侧边栏顺序。取消勾选即可在侧边栏中隐藏该面板。",
+  showPanel: "显示",
+  resetPanelOrder: "重置顺序",
+  panelOrderReset: "侧边栏顺序已恢复。",
   runtimeSetup: "运行环境",
   runtimeHint: "已内置 scrcpy 与 adb，可以直接使用。",
   chooseScrcpy: "选择其他 scrcpy",
@@ -9441,7 +9455,60 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const query = appSearch.value.trim().toLocaleLowerCase();
       return installedApps.value.filter((item) => item.launchable && (showSystemApps.value || !item.system) && (!query || item.packageId.toLocaleLowerCase().includes(query) || item.label.toLocaleLowerCase().includes(query)));
     });
-    const settingsSections = ["general", "video", "controls", "recording", "geometry", "advanced"];
+    const settingsSections = ["general", "video", "controls", "recording", "geometry", "advanced", "panels"];
+    const panelOrderDefault = ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
+    const panelVisibilityDefault = { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true };
+    const visibleTabs = computed(() => (Array.isArray(config.panelOrder) && config.panelOrder.length ? config.panelOrder : panelOrderDefault).filter((tab) => config.panelVisibility?.[tab] !== false));
+    watch(visibleTabs, (tabs) => {
+      if (!tabs.includes(activeTab.value)) activeTab.value = tabs[0] || "devices";
+    }, { immediate: true });
+    const panelDragging = ref(null);
+    const panelDragOver = ref(null);
+    function panelDragStart(tab, event) {
+      panelDragging.value = tab;
+      if (event?.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        try {
+          event.dataTransfer.setData("text/plain", tab);
+        } catch {
+        }
+      }
+    }
+    function panelDragEnter(tab, event) {
+      if (!panelDragging.value) return;
+      event?.preventDefault();
+      if (event?.dataTransfer) event.dataTransfer.dropEffect = "move";
+      panelDragOver.value = tab;
+    }
+    function panelDropOn(tab, event) {
+      event?.preventDefault();
+      const source = panelDragging.value || (event?.dataTransfer?.getData("text/plain") || "");
+      panelDragging.value = null;
+      panelDragOver.value = null;
+      if (!source || source === tab) return;
+      const order = (Array.isArray(config.panelOrder) && config.panelOrder.length ? config.panelOrder : panelOrderDefault).slice();
+      const from = order.indexOf(source);
+      const to = order.indexOf(tab);
+      if (from < 0 || to < 0) return;
+      order.splice(from, 1);
+      order.splice(to, 0, source);
+      config.panelOrder = order;
+    }
+    function panelDragEnd() {
+      panelDragging.value = null;
+      panelDragOver.value = null;
+    }
+    function togglePanelVisibility(tab, event) {
+      const next = { ...(config.panelVisibility || panelVisibilityDefault) };
+      next[tab] = !!event?.target?.checked;
+      config.panelVisibility = next;
+    }
+    function resetPanelOrder() {
+      config.panelOrder = panelOrderDefault.slice();
+      config.panelVisibility = { ...panelVisibilityDefault };
+      toast("success", t("panelOrderReset"));
+    }
+
     const capabilityFeatureKeys = [
       "screen",
       "camera",
@@ -11042,7 +11109,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         ]),
         createBaseVNode("aside", _hoisted_2, [
           createBaseVNode("nav", _hoisted_3, [
-            (openBlock(), createElementBlock(Fragment, null, renderList(["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"], (tab) => {
+            (openBlock(), createElementBlock(Fragment, null, renderList(visibleTabs.value, (tab) => {
               return createBaseVNode("button", {
                 key: tab,
                 class: normalizeClass({ active: activeTab.value === tab }),
@@ -11051,7 +11118,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 createTextVNode(toDisplayString(t(tab)) + " ", 1),
                 tab === "logs" && logs.value.length ? (openBlock(), createElementBlock("span", _hoisted_5, toDisplayString(logs.value.length), 1)) : tab === "sessions" && sessions.value.filter(sessionIsActive).length ? (openBlock(), createElementBlock("span", _hoisted_6, toDisplayString(sessions.value.filter(sessionIsActive).length), 1)) : createCommentVNode("", true)
               ], 10, _hoisted_4);
-            }), 64))
+            }), 128))
           ]),
         ]),
         createBaseVNode("main", null, [
@@ -14429,6 +14496,38 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     ]),
                     createBaseVNode("small", null, toDisplayString(t("bossKeyHint")), 1)
                   ])
+                ])
+              ])) : createCommentVNode("", true),
+              activeSettingsSection.value === "panels" ? (openBlock(), createElementBlock("section", { key: 7, class: "panel settings-section wide" }, [
+                createBaseVNode("h2", null, toDisplayString(t("panels")), 1),
+                createBaseVNode("p", { class: "muted" }, toDisplayString(t("panelsHint")), 1),
+                createBaseVNode("div", { class: "panel-order-list" }, [
+                  (openBlock(), createElementBlock(Fragment, null, renderList(visibleTabs.value, (tab) => {
+                    return createBaseVNode("div", {
+                      key: tab,
+                      class: normalizeClass(["panel-order-item", { dragging: panelDragging.value === tab, "drop-target": panelDragOver.value === tab }]),
+                      draggable: "true",
+                      onDragstart: ($event) => panelDragStart(tab, $event),
+                      onDragenter: ($event) => panelDragEnter(tab, $event),
+                      onDragover: ($event) => panelDragEnter(tab, $event),
+                      onDrop: ($event) => panelDropOn(tab, $event),
+                      onDragend: panelDragEnd
+                    }, [
+                      createBaseVNode("span", { class: "drag-handle" }, "\u283f", 1),
+                      createBaseVNode("span", { class: "panel-order-label" }, toDisplayString(t(tab)), 1),
+                      createBaseVNode("label", { class: "toggle panel-visibility" }, [
+                        createBaseVNode("input", {
+                          type: "checkbox",
+                          checked: config.panelVisibility?.[tab] !== false,
+                          onChange: ($event) => togglePanelVisibility(tab, $event)
+                        }, null, 8, ["checked", "onChange"]),
+                        createBaseVNode("span", null, toDisplayString(t("showPanel")), 1)
+                      ])
+                    ], 10, ["onDragstart", "onDragenter", "onDragover", "onDrop", "onDragend"]);
+                  }), 128))
+                ]),
+                createBaseVNode("div", { class: "button-row" }, [
+                  createBaseVNode("button", { class: "ghost compact", onClick: resetPanelOrder }, toDisplayString(t("resetPanelOrder")), 1)
                 ])
               ])) : createCommentVNode("", true)
             ])
