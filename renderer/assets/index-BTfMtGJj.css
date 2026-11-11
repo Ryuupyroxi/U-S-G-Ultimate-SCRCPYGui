@@ -306,3 +306,80 @@ h1, h2, h3, h4, .panel-title, .brand-copy strong { font-weight: 700; }
 .panel-order-item .drag-handle { color: var(--text-faint); font-size: 13px; user-select: none; }
 .panel-order-item .panel-order-label { flex: 1; font-weight: 600; }
 .panel-order-item .toggle { min-height: 0; }
+
+/* v1.1.1 — virtual display options: 2 columns so "Resize with window" sits under "Destroy content on close" */
+.vd-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* ---- v1.1.1: switch checkboxes (filled with the secondary accent) ---- */
+input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 34px !important;
+  height: 20px !important;
+  min-width: 34px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 999px !important;
+  background: var(--neutral-2) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08);
+  cursor: pointer;
+  position: relative;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  transition: background .16s ease, border-color .16s ease;
+}
+input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+  transition: transform .16s ease;
+}
+input[type="checkbox"]:checked {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+}
+input[type="checkbox"]:checked::after { transform: translateX(14px); }
+input[type="checkbox"]:disabled { opacity: .45; cursor: not-allowed; }
+input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px var(--focus-ring); outline: none; }
+
+/* ---- v1.1.1: toolkit scripts grid + ADB command hover pop-up ---- */
+.tk-scripts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; align-items: start; }
+.tk-cmd { position: relative; }
+.tk-cmd::after {
+  content: attr(data-tip) "\A" attr(data-cmd);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  max-width: 250px;
+  width: max-content;
+  padding: 7px 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 10px 26px var(--shadow-md);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+  z-index: 60;
+}
+.tk-cmd:hover::after, .tk-cmd:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

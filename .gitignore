@@ -3,3 +3,5 @@ dist/
 out.AppImage
 *.log
 .DS_Store
+__pycache__/
+*.pyc

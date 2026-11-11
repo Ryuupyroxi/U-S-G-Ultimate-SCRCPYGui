@@ -1559,6 +1559,17 @@ ${result.stderr}`.trim();
     });
   }
 }
+const PRIVATE_IP = /^(?:10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/;
+const MOBILE_IFACE = /^(?:rmnet|ccmni|usb|rndis|data|wwan)/i;
+function wifiRouteIp(stdout) {
+  for (const line of (stdout || "").split("\n")) {
+    const device = line.match(/\bdev\s+([A-Za-z0-9._-]+)/);
+    if (device && MOBILE_IFACE.test(device[1])) continue;
+    const match = line.match(/\bsrc\s+(\d{1,3}(?:\.\d{1,3}){3})/);
+    if (match && PRIVATE_IP.test(match[1])) return match[1];
+  }
+  return "";
+}
 async function enableLegacyWireless(runtime, serial) {
   const target = serial.trim();
   if (!target) return operationFailure("DEVICE_REQUIRED", "validation", "Choose a device first.");
@@ -1566,27 +1577,24 @@ async function enableLegacyWireless(runtime, serial) {
     const tcpip = await adbCommand(runtime, ["-s", target, "tcpip", "5555"]);
     const tcpipOutput = `${tcpip.stdout}\n${tcpip.stderr}`.trim();
     let ip = "";
+    const probes = [
+      ["ip", "addr", "show", "wlan0"],
+      ["ifconfig", "wlan0"],
+      ["ip", "route"]
+    ];
     for (let attempt = 0; attempt < 3 && !ip; attempt++) {
       if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 1000));
-      try {
-        const route = await adbCommand(runtime, ["-s", target, "shell", "ip", "route"]);
-        const routeMatch = (route.stdout || "").match(/\bsrc\s+(\d{1,3}(?:\.\d{1,3}){3})/);
-        if (routeMatch) ip = routeMatch[1];
-      } catch {
-      }
-      if (!ip) {
+      for (const probe of probes) {
+        if (ip) break;
         try {
-          const addr = await adbCommand(runtime, ["-s", target, "shell", "ip", "addr", "show", "wlan0"]);
-          const addrMatch = (addr.stdout || "").match(/inet\s+(\d{1,3}(?:\.\d{1,3}){3})/);
-          if (addrMatch) ip = addrMatch[1];
-        } catch {
-        }
-      }
-      if (!ip) {
-        try {
-          const legacy = await adbCommand(runtime, ["-s", target, "shell", "ifconfig", "wlan0"]);
-          const legacyMatch = (legacy.stdout || "").match(/inet\s+addr:(\d{1,3}(?:\.\d{1,3}){3})/);
-          if (legacyMatch) ip = legacyMatch[1];
+          const result = await adbCommand(runtime, ["-s", target, "shell", ...probe]);
+          const text = `${result.stdout}\n${result.stderr}`;
+          if (probe[0] === "ip" && probe[1] === "route") {
+            ip = wifiRouteIp(text);
+          } else {
+            const match = text.match(/inet\s+(?:addr:)?(\d{1,3}(?:\.\d{1,3}){3})/);
+            if (match && PRIVATE_IP.test(match[1])) ip = match[1];
+          }
         } catch {
         }
       }
@@ -1951,7 +1959,7 @@ function defaultPersistedConfig(locale2) {
     navBar: false,
     qrPairing: false,
     panelOrder: PANEL_IDS.slice(),
-    panelVisibility: { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
+    panelVisibility: { devices: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
     scripts: {},
     muteNotifications: false,
     minimizeToTray: false,
@@ -2494,7 +2502,7 @@ function themeValue(value, fallback) {
   if (fallback) return fallback;
   return "light";
 }
-const PANEL_IDS = ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
+const PANEL_IDS = ["devices", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
 const panelIds = /* @__PURE__ */ new Set(PANEL_IDS);
 function panelOrderValue(value, fallback) {
   const base = Array.isArray(fallback) ? fallback.slice() : PANEL_IDS.slice();

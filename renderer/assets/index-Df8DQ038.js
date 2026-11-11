@@ -7025,8 +7025,8 @@ function defaultPersistedConfig(locale) {
     swipePanel: false,
     navBar: false,
     qrPairing: false,
-    panelOrder: ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"],
-    panelVisibility: { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
+    panelOrder: ["devices", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"],
+    panelVisibility: { devices: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true },
     scripts: {},
     muteNotifications: false,
     update: { checkOnStartup: false, autoUpdateOnStartup: false, skipConfirmation: false },
@@ -7104,6 +7104,34 @@ const SCRCPY_SCRIPTS = [
   { id: "disable-screensaver", label: "Disable screensaver", args: "--disable-screensaver" },
   { id: "no-mipmaps", label: "No mipmaps", args: "--no-mipmaps" },
   { id: "no-power-on", label: "No power on", args: "--no-power-on" }
+];
+
+const TOOLKIT_DEVICE_COMMANDS = [
+  { id: "list-devices", label: "List devices", desc: "List connected devices with model and transport details", args: ["devices", "-l"] },
+  { id: "model", label: "Model", desc: "Show the device marketing model name", args: ["shell", "getprop", "ro.product.model"] },
+  { id: "android-version", label: "Android version", desc: "Show the Android version string", args: ["shell", "getprop", "ro.build.version.release"] },
+  { id: "sdk", label: "SDK level", desc: "Show the Android API level", args: ["shell", "getprop", "ro.build.version.sdk"] },
+  { id: "fingerprint", label: "Build fingerprint", desc: "Show the full build fingerprint", args: ["shell", "getprop", "ro.build.fingerprint"] },
+  { id: "battery", label: "Battery", desc: "Show battery level, health and charging state", args: ["shell", "dumpsys", "battery"] },
+  { id: "screen-size", label: "Screen size", desc: "Show the current display resolution", args: ["shell", "wm", "size"] },
+  { id: "density", label: "Screen density", desc: "Show the current display density", args: ["shell", "wm", "density"] },
+  { id: "uptime", label: "Uptime", desc: "Show how long the device has been running", args: ["shell", "uptime"] },
+  { id: "storage", label: "Storage", desc: "Show free and used space on the data partition", args: ["shell", "df", "/data"] },
+  { id: "memory", label: "Memory", desc: "Show RAM totals and current usage", args: ["shell", "cat", "/proc/meminfo"] },
+  { id: "cpu", label: "CPU", desc: "Show processor cores and architecture", args: ["shell", "cat", "/proc/cpuinfo"] },
+  { id: "ip-address", label: "IP address", desc: "Show the device network routes and IP address", args: ["shell", "ip", "route"] }
+];
+const TOOLKIT_CONTROL_COMMANDS = [
+  { id: "home", label: "Home", desc: "Press the Home button", args: ["shell", "input", "keyevent", "3"] },
+  { id: "back", label: "Back", desc: "Press the Back button", args: ["shell", "input", "keyevent", "4"] },
+  { id: "recents", label: "Recents", desc: "Press the Recents / app-switch button", args: ["shell", "input", "keyevent", "187"] },
+  { id: "volume-up", label: "Volume up", desc: "Raise the media volume", args: ["shell", "input", "keyevent", "24"] },
+  { id: "volume-down", label: "Volume down", desc: "Lower the media volume", args: ["shell", "input", "keyevent", "25"] }
+];
+const TOOLKIT_APP_COMMANDS = [
+  { id: "user-apps", label: "User apps", desc: "List installed user (3rd-party) apps", args: ["shell", "pm", "list", "packages", "-3"] },
+  { id: "all-apps", label: "All apps", desc: "List every installed package", args: ["shell", "pm", "list", "packages"] },
+  { id: "downloads", label: "Downloads", desc: "List files in the Download folder", args: ["shell", "ls", "-l", "/sdcard/Download"] }
 ];
 function enabledScriptArgs(config) {
   const enabled = config.scripts || {};
@@ -7447,6 +7475,10 @@ const en = {
   toolkitShizukuStop: "Stop Shizuku",
   toolkitShizukuStatus: "Shizuku status",
   toolkitShizukuHint: "Requires Shizuku to have been started via adb at least once.",
+  toolkitAdbServerTitle: "Server",
+  toolkitAdbDeviceTitle: "Device information",
+  toolkitAdbControlTitle: "Device control",
+  toolkitAdbAppsTitle: "Apps & files",
   toolkitNoOutput: "(no output)",
   swipePanelLabel: "Swipe",
   navBarLabel: "Navigation",
@@ -8616,7 +8648,7 @@ const _hoisted_74 = { class: "preset-row" };
 const _hoisted_75 = { id: "launchable-apps" };
 const _hoisted_76 = ["value"];
 const _hoisted_77 = { class: "field-triple" };
-const _hoisted_78 = { class: "toggle-grid compact-grid" };
+const _hoisted_78 = { class: "toggle-grid vd-options" };
 const _hoisted_79 = { class: "toggle" };
 const _hoisted_80 = { class: "toggle" };
 const _hoisted_81 = { class: "toggle" };
@@ -9264,7 +9296,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const qrBusy = /* @__PURE__ */ ref(false);
     const qrStatus = /* @__PURE__ */ ref("");
     const activeSettingsSection = /* @__PURE__ */ ref("general");
-    const version2 = /* @__PURE__ */ ref("1.0.0-alpha");
+    const version2 = /* @__PURE__ */ ref("1.1.1");
     const environment = /* @__PURE__ */ ref(null);
     const updateInfo = /* @__PURE__ */ ref({ checking: false, applying: false, items: [], lastCheck: null, error: "" });
     const updateConfirmOpen = /* @__PURE__ */ ref(false);
@@ -9357,7 +9389,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const newStepNumberD = /* @__PURE__ */ ref(0.8);
     const newStepDuration = /* @__PURE__ */ ref(300);
     const newStepText = /* @__PURE__ */ ref("");
-    const bootSerial = /* @__PURE__ */ ref("");
     const toolkitSerial = /* @__PURE__ */ ref("");
     const toolkitCommand = /* @__PURE__ */ ref("");
     const toolkitOutput = /* @__PURE__ */ ref("");
@@ -9403,14 +9434,15 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     };
     const usableDevices = computed(() => devices.value.filter((device) => device.state === "device"));
     const legacyWirelessDevice = computed(() => {
+      const eligible = (device) => {
+        const entry = deviceSdkVersions.value[device?.serial];
+        return Boolean(device) && device.state === "device" && device.connection === "usb" && Number.isFinite(entry?.sdk) && entry.sdk <= 29;
+      };
       const selected = selectedSerials.value
         .map((serial) => devices.value.find((item) => item.serial === serial))
-        .filter((device) => device && device.state === "device" && device.connection === "usb");
-      for (const device of selected) {
-        const entry = deviceSdkVersions.value[device.serial];
-        if (entry && Number.isFinite(entry.sdk) && entry.sdk <= 29) return device;
-      }
-      return null;
+        .filter(eligible);
+      if (selected.length) return selected[0];
+      return devices.value.find(eligible) || null;
     });
     const legacyWirelessHintText = computed(() => {
       if (legacyWirelessDevice.value) {
@@ -9418,13 +9450,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         const version = entry?.release ? `${entry.release} (API ${entry.sdk})` : entry ? String(entry.sdk) : "10-";
         return t("legacyWirelessReadyHint").replace("{version}", version);
       }
-      if (selectedSerials.value.length === 0) return t("legacyWirelessSelectHint");
-      const selectedDevices = selectedSerials.value
-        .map((serial) => devices.value.find((item) => item.serial === serial))
-        .filter((device) => device && device.state === "device");
-      if (selectedDevices.length === 0) return t("legacyWirelessSelectHint");
-      if (selectedDevices.some((device) => device.connection !== "usb")) return t("legacyWirelessUsbHint");
-      const tooNew = selectedDevices.find((device) => {
+      const usbDevices = devices.value.filter((device) => device.state === "device" && device.connection === "usb");
+      if (usbDevices.length === 0) return t("legacyWirelessUsbHint");
+      const tooNew = usbDevices.find((device) => {
         const entry = deviceSdkVersions.value[device.serial];
         return entry && Number.isFinite(entry.sdk) && entry.sdk > 29;
       });
@@ -9456,9 +9484,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       return installedApps.value.filter((item) => item.launchable && (showSystemApps.value || !item.system) && (!query || item.packageId.toLocaleLowerCase().includes(query) || item.label.toLocaleLowerCase().includes(query)));
     });
     const settingsSections = ["general", "video", "controls", "recording", "geometry", "advanced", "panels"];
-    const panelOrderDefault = ["devices", "boot", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
-    const panelVisibilityDefault = { devices: true, boot: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true };
-    const visibleTabs = computed(() => (Array.isArray(config.panelOrder) && config.panelOrder.length ? config.panelOrder : panelOrderDefault).filter((tab) => config.panelVisibility?.[tab] !== false));
+    const panelOrderDefault = ["devices", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
+    const panelVisibilityDefault = { devices: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true };
+    const panelOrderAll = computed(() => {
+      const order = Array.isArray(config.panelOrder) && config.panelOrder.length ? config.panelOrder : panelOrderDefault;
+      const seen = /* @__PURE__ */ new Set();
+      const result = [];
+      for (const tab of order) {
+        if (panelOrderDefault.includes(tab) && !seen.has(tab)) {
+          seen.add(tab);
+          result.push(tab);
+        }
+      }
+      for (const tab of panelOrderDefault) if (!seen.has(tab)) result.push(tab);
+      return result;
+    });
+    const visibleTabs = computed(() => panelOrderAll.value.filter((tab) => config.panelVisibility?.[tab] !== false));
     watch(visibleTabs, (tabs) => {
       if (!tabs.includes(activeTab.value)) activeTab.value = tabs[0] || "devices";
     }, { immediate: true });
@@ -9630,15 +9671,29 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         probeSerial.value = selectedSerials.value.find((serial) => available.has(serial)) || usableDevices.value[0]?.serial || "";
       }
     });
-    watch([selectedSerials, devices], async () => {
-      for (const serial of selectedSerials.value) {
+    const sdkProbeRetry = ref(0);
+    watch([selectedSerials, devices, sdkProbeRetry], async () => {
+      const candidates = /* @__PURE__ */ new Set(selectedSerials.value);
+      for (const device of devices.value) {
+        if (device.state === "device" && device.connection === "usb") candidates.add(device.serial);
+      }
+      for (const serial of candidates) {
         if (deviceSdkVersions.value[serial] != null) continue;
         const device = devices.value.find((item) => item.serial === serial);
         if (!device || device.connection !== "usb") continue;
-        const result = await window.scrcpy.deviceSdk(runtimeSnapshot(), serial);
-        if (result.ok && result.data && Number.isFinite(Number(result.data.sdk))) {
-          deviceSdkVersions.value[serial] = { sdk: Number(result.data.sdk), release: String(result.data.release || "") };
+        try {
+          const result = await window.scrcpy.deviceSdk(runtimeSnapshot(), serial);
+          if (result.ok && result.data && Number.isFinite(Number(result.data.sdk))) {
+            deviceSdkVersions.value[serial] = { sdk: Number(result.data.sdk), release: String(result.data.release || "") };
+          }
+        } catch {
         }
+      }
+      const unresolved = devices.value.some((device) => device.state === "device" && device.connection === "usb" && deviceSdkVersions.value[device.serial] == null);
+      if (sdkProbeRetry.value < 4 && unresolved) {
+        window.setTimeout(() => {
+          sdkProbeRetry.value += 1;
+        }, 2500);
       }
     }, { immediate: true });
     watch(probeSerial, () => {
@@ -9754,14 +9809,28 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }
       await applyDeviceSnapshot(result.data || []);
     }
+    const selectionRestore = /* @__PURE__ */ new Map();
     async function applyDeviceSnapshot(nextDevices) {
       devices.value = [...new Map(nextDevices.map((device) => [device.serial, device])).values()];
       const available = new Set(devices.value.map((device) => device.serial));
-      selectedSerials.value = selectedSerials.value.filter((serial) => available.has(serial));
+      const previous = selectedSerials.value;
+      const kept = previous.filter((serial) => available.has(serial));
+      const dropped = previous.filter((serial) => !available.has(serial));
+      const now = Date.now();
+      for (const serial of dropped) selectionRestore.set(serial, now);
+      for (const [serial, at] of selectionRestore) {
+        if (now - at > 12000) selectionRestore.delete(serial);
+      }
+      for (const serial of available) {
+        if (!selectionRestore.has(serial) || kept.includes(serial)) continue;
+        kept.push(serial);
+        selectionRestore.delete(serial);
+      }
+      selectedSerials.value = kept;
       for (const serial of autoLaunchAttempted) {
         if (!available.has(serial)) autoLaunchAttempted.delete(serial);
       }
-      if (config.autoSelectFirstDevice && !selectedSerials.value.length) {
+      if (config.autoSelectFirstDevice && !selectedSerials.value.length && selectionRestore.size === 0) {
         const first = devices.value.find((device) => device.state === "device");
         if (first) selectedSerials.value = [first.serial];
       }
@@ -9883,13 +9952,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }
       commandPreviews.value = result.data || [];
     }
-    const toolkitDevice = () => toolkitSerial.value || bootSerial.value || controlSerial.value || selectedSerials.value[0] || "";
+    const toolkitDevice = () => toolkitSerial.value || controlSerial.value || selectedSerials.value[0] || "";
     const recentCommands = computed(() => config.toolkit.recentCommands || []);
     const mostUsedCommands = computed(() => Object.entries(config.toolkit.commandUsage || {}).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([cmd]) => cmd));
     watch(usableDevices, (list) => {
       const serials = list.map((device) => device.serial);
       if (!serials.includes(toolkitSerial.value)) toolkitSerial.value = serials[0] || "";
-      if (!serials.includes(bootSerial.value)) bootSerial.value = serials[0] || "";
     }, { immediate: true });
     function rememberCommand(command) {
       const trimmed = command.trim();
@@ -11666,15 +11734,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       ]),
                       createBaseVNode("span", null, toDisplayString(t("destroyContent")), 1)
                     ]),
-                    createBaseVNode("label", _hoisted_81, [
-                      withDirectives(createBaseVNode("input", {
-                        "onUpdate:modelValue": _cache[32] || (_cache[32] = ($event) => config.launch.virtualDisplay.flexDisplay = $event),
-                        type: "checkbox"
-                      }, null, 512), [
-                        [vModelCheckbox, config.launch.virtualDisplay.flexDisplay]
-                      ]),
-                      createBaseVNode("span", null, toDisplayString(t("flexDisplay")), 1)
-                    ]),
                     createBaseVNode("label", _hoisted_82, [
                       withDirectives(createBaseVNode("input", {
                         "onUpdate:modelValue": _cache[33] || (_cache[33] = ($event) => config.launch.virtualDisplay.keepActive = $event),
@@ -11683,6 +11742,15 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         [vModelCheckbox, config.launch.virtualDisplay.keepActive]
                       ]),
                       createBaseVNode("span", null, toDisplayString(t("keepActive")), 1)
+                    ]),
+                    createBaseVNode("label", _hoisted_81, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": _cache[32] || (_cache[32] = ($event) => config.launch.virtualDisplay.flexDisplay = $event),
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, config.launch.virtualDisplay.flexDisplay]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("flexDisplay")), 1)
                     ])
                   ]),
                   createBaseVNode("label", null, [
@@ -12623,7 +12691,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     class: "secondary compact",
                     disabled: qrBusy.value || !environment.value?.adb.ok,
                     onClick: startQrPairing
-                  }, toDisplayString(qrBusy.value ? t("qrWaiting") : t("qrPair")), 9)) : createCommentVNode("", true)
+                  }, toDisplayString(qrBusy.value ? t("qrWaiting") : t("qrPair")), 9, ["disabled"])) : createCommentVNode("", true)
                 ]),
                 createBaseVNode("div", { class: "legacy-wireless" }, [
                   createBaseVNode("div", { class: "panel-title" }, [
@@ -14044,60 +14112,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               activeSettingsSection.value === "controls" ? (openBlock(), createElementBlock("section", _hoisted_423, [
                 createBaseVNode("h2", null, toDisplayString(t("behavior")), 1),
                 createBaseVNode("div", _hoisted_424, [
-                  createBaseVNode("label", _hoisted_425, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[121] || (_cache[121] = ($event) => config.launch.alwaysOnTop = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.alwaysOnTop]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("alwaysOnTop")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_426, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[122] || (_cache[122] = ($event) => config.launch.control = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.control]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("control")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_427, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[123] || (_cache[123] = ($event) => config.launch.audio = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.audio]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("audio")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_428, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[124] || (_cache[124] = ($event) => config.launch.turnScreenOff = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.turnScreenOff]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("turnScreenOff")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_429, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[125] || (_cache[125] = ($event) => config.launch.stayAwake = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.stayAwake]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("stayAwake")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_430, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[126] || (_cache[126] = ($event) => config.launch.showTouches = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.showTouches]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("showTouches")), 1)
-                  ]),
                   createBaseVNode("label", { class: "toggle" }, [
                     withDirectives(createBaseVNode("input", {
                       "onUpdate:modelValue": ($event) => config.swipePanel = $event,
@@ -14116,42 +14130,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     ]),
                     createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
                   ]),
-                  createBaseVNode("label", _hoisted_431, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[127] || (_cache[127] = ($event) => config.launch.fullscreen = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.fullscreen]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("fullscreen")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_432, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[128] || (_cache[128] = ($event) => config.launch.borderless = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.borderless]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("borderless")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_433, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[129] || (_cache[129] = ($event) => config.launch.windowAspectRatioLock = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.launch.windowAspectRatioLock]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("aspectRatioLock")), 1)
-                  ]),
-                  createBaseVNode("label", _hoisted_434, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": _cache[130] || (_cache[130] = ($event) => config.autoSelectFirstDevice = $event),
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.autoSelectFirstDevice]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("autoSelectFirst")), 1)
-                  ])
                 ])
               ])) : createCommentVNode("", true),
               activeSettingsSection.value === "recording" ? (openBlock(), createElementBlock("section", _hoisted_435, [
@@ -14320,6 +14298,98 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       ]
                     ])
                   ])
+                ]),
+                createBaseVNode("div", { class: "toggle-grid" }, [
+                  createBaseVNode("label", _hoisted_425, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[121] || (_cache[121] = ($event) => config.launch.alwaysOnTop = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.alwaysOnTop]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("alwaysOnTop")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_426, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[122] || (_cache[122] = ($event) => config.launch.control = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.control]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("control")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_427, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[123] || (_cache[123] = ($event) => config.launch.audio = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.audio]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("audio")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_428, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[124] || (_cache[124] = ($event) => config.launch.turnScreenOff = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.turnScreenOff]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("turnScreenOff")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_429, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[125] || (_cache[125] = ($event) => config.launch.stayAwake = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.stayAwake]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("stayAwake")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_430, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[126] || (_cache[126] = ($event) => config.launch.showTouches = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.showTouches]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("showTouches")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_431, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[127] || (_cache[127] = ($event) => config.launch.fullscreen = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.fullscreen]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("fullscreen")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_432, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[128] || (_cache[128] = ($event) => config.launch.borderless = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.borderless]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("borderless")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_433, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[129] || (_cache[129] = ($event) => config.launch.windowAspectRatioLock = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.launch.windowAspectRatioLock]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("aspectRatioLock")), 1)
+                  ]),
+                  createBaseVNode("label", _hoisted_434, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": _cache[130] || (_cache[130] = ($event) => config.autoSelectFirstDevice = $event),
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.autoSelectFirstDevice]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("autoSelectFirst")), 1)
+                  ])
                 ])
               ])) : createCommentVNode("", true),
               activeSettingsSection.value === "advanced" ? (openBlock(), createElementBlock("section", _hoisted_452, [
@@ -14396,7 +14466,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     createBaseVNode("small", null, toDisplayString(t("tunnelPortHint")), 1)
                   ])
                 ]),
-                createBaseVNode("div", { class: "toggle-columns" }, [
                 createBaseVNode("div", { class: "toggle-col" }, [
                 createBaseVNode("label", _hoisted_454, [
                   withDirectives(createBaseVNode("input", {
@@ -14453,23 +14522,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   createBaseVNode("span", null, toDisplayString(t("skipUpdateConfirmation")), 1)
                 ])
                 ]),
-                createBaseVNode("div", { class: "toggle-col scripts-col" }, [
-                  createBaseVNode("p", { class: "eyebrow" }, toDisplayString(t("scripts")), 1),
-                  createBaseVNode("p", { class: "muted scripts-hint" }, toDisplayString(t("scriptsHint")), 1),
-                  (openBlock(true), createElementBlock(Fragment, null, renderList(SCRCPY_SCRIPTS, (script) => {
-                    return openBlock(), createElementBlock("label", { key: script.id, class: "toggle" }, [
-                      withDirectives(createBaseVNode("input", {
-                        "onUpdate:modelValue": ($event) => config.scripts[script.id] = $event,
-                        type: "checkbox"
-                      }, null, 512), [
-                        [vModelCheckbox, config.scripts[script.id]]
-                      ]),
-                      createBaseVNode("span", { title: script.args }, toDisplayString(script.label), 1)
-                    ]);
-                  }), 128))
-                ])
-                ]),
-                createBaseVNode("div", _hoisted_457, [
+                                createBaseVNode("div", _hoisted_457, [
                   createBaseVNode("label", _hoisted_458, [
                     withDirectives(createBaseVNode("input", {
                       "onUpdate:modelValue": _cache[150] || (_cache[150] = ($event) => config.bossKeyEnabled = $event),
@@ -14502,7 +14555,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 createBaseVNode("h2", null, toDisplayString(t("panels")), 1),
                 createBaseVNode("p", { class: "muted" }, toDisplayString(t("panelsHint")), 1),
                 createBaseVNode("div", { class: "panel-order-list" }, [
-                  (openBlock(), createElementBlock(Fragment, null, renderList(visibleTabs.value, (tab) => {
+                  (openBlock(), createElementBlock(Fragment, null, renderList(panelOrderAll.value, (tab) => {
                     return createBaseVNode("div", {
                       key: tab,
                       class: normalizeClass(["panel-order-item", { dragging: panelDragging.value === tab, "drop-target": panelDragOver.value === tab }]),
@@ -14662,46 +14715,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 ], 2);
               }), 128))
             ])
-          ], 64)) : activeTab.value === "boot" ? (openBlock(), createElementBlock("section", { key: 7, class: "panel" }, [
-            createBaseVNode("div", { class: "panel-title" }, [
-              createBaseVNode("div", null, [
-                createBaseVNode("p", { class: "eyebrow" }, toDisplayString(t("boot")), 1),
-                createBaseVNode("p", { class: "muted" }, toDisplayString(t("bootHint")), 1)
-              ]),
-              createBaseVNode("label", { class: "inline-form" }, [
-                createBaseVNode("span", null, toDisplayString(t("bootDevice")), 1),
-                withDirectives(createBaseVNode("select", {
-                  "onUpdate:modelValue": ($event) => bootSerial.value = $event
-                }, [
-                  (openBlock(true), createElementBlock(Fragment, null, renderList(usableDevices.value, (device) => {
-                    return openBlock(), createElementBlock("option", {
-                      key: device.serial,
-                      value: device.serial
-                    }, toDisplayString(config.deviceAliases[device.serial] || device.model) + " \u00b7 " + toDisplayString(device.serial), 9);
-                  }), 128))
-                ], 512), [
-                  [vModelSelect, bootSerial.value]
-                ])
-              ])
-            ]),
-            createBaseVNode("div", { class: "toolkit-grid" }, [
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("reboot") }, toDisplayString(t("bootReboot")), 1),
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("recovery") }, toDisplayString(t("bootRecovery")), 1),
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("bootloader") }, toDisplayString(t("bootBootloader")), 1),
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("safe-mode") }, toDisplayString(t("bootSafeMode")), 1),
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("wake") }, toDisplayString(t("bootWake")), 1),
-              createBaseVNode("button", { class: "secondary", onClick: () => bootAction("sleep") }, toDisplayString(t("bootSleep")), 1),
-              createBaseVNode("button", { class: "danger", onClick: () => bootAction("power-off") }, toDisplayString(t("bootPowerOff")), 1)
-            ]),
-            createBaseVNode("p", { class: "muted" }, toDisplayString(t("bootSafeModeHint")), 1)
-          ])) : activeTab.value === "toolkit" ? (openBlock(), createElementBlock("section", { key: 8, class: "panel" }, [
+          ], 64)) : activeTab.value === "toolkit" ? (openBlock(), createElementBlock("section", { key: 8, class: "panel" }, [
             createBaseVNode("div", { class: "panel-title" }, [
               createBaseVNode("div", null, [
                 createBaseVNode("p", { class: "eyebrow" }, toDisplayString(t("toolkit")), 1),
                 createBaseVNode("p", { class: "muted" }, toDisplayString(t("toolkitHint")), 1)
               ]),
               createBaseVNode("label", { class: "inline-form" }, [
-                createBaseVNode("span", null, toDisplayString(t("bootDevice")), 1),
+                createBaseVNode("span", null, toDisplayString(t("device")), 1),
                 withDirectives(createBaseVNode("select", {
                   "onUpdate:modelValue": ($event) => toolkitSerial.value = $event
                 }, [
@@ -14709,25 +14730,72 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     return openBlock(), createElementBlock("option", {
                       key: device.serial,
                       value: device.serial
-                    }, toDisplayString(config.deviceAliases[device.serial] || device.model) + " \u00b7 " + toDisplayString(device.serial), 9);
+                    }, toDisplayString(config.deviceAliases[device.serial] || device.model) + " \u00b7 " + toDisplayString(device.serial), 9, ["value"]);
                   }), 128))
                 ], 512), [
                   [vModelSelect, toolkitSerial.value]
                 ])
               ])
             ]),
-            createBaseVNode("div", { class: "toolkit-section" }, [
+createBaseVNode("div", { class: "toolkit-section" }, [
+              createBaseVNode("div", { class: "toolkit-section-title" }, toDisplayString(t("boot")), 1),
+              createBaseVNode("div", { class: "toolkit-grid" }, [
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("reboot") }, toDisplayString(t("bootReboot")), 1),
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("recovery") }, toDisplayString(t("bootRecovery")), 1),
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("bootloader") }, toDisplayString(t("bootBootloader")), 1),
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("safe-mode") }, toDisplayString(t("bootSafeMode")), 1),
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("wake") }, toDisplayString(t("bootWake")), 1),
+                createBaseVNode("button", { class: "secondary compact", onClick: () => bootAction("sleep") }, toDisplayString(t("bootSleep")), 1),
+                createBaseVNode("button", { class: "danger compact", onClick: () => bootAction("power-off") }, toDisplayString(t("bootPowerOff")), 1)
+              ]),
+              createBaseVNode("p", { class: "muted" }, toDisplayString(t("bootSafeModeHint")), 1)
+            ]),
+createBaseVNode("div", { class: "toolkit-section" }, [
               createBaseVNode("div", { class: "toolkit-section-title" }, toDisplayString(t("toolkitAdbTitle")), 1),
+              createBaseVNode("div", { class: "toolkit-subtitle" }, toDisplayString(t("toolkitAdbServerTitle")), 1),
               createBaseVNode("div", { class: "toolkit-row" }, [
                 createBaseVNode("button", { class: "secondary compact", onClick: () => adbServerAction("restart") }, toDisplayString(t("restartAdbServer")), 1),
                 createBaseVNode("button", { class: "secondary compact", onClick: () => adbServerAction("stop") }, toDisplayString(t("stopAdbServer")), 1),
-                createBaseVNode("button", { class: "secondary compact", onClick: () => refreshDevices() }, toDisplayString(t("refresh")), 1),
-                createBaseVNode("button", { class: "secondary compact", onClick: () => runToolkitAdb(["devices", "-l"]) }, toDisplayString(t("listDevices")), 1),
-                createBaseVNode("button", { class: "secondary compact", onClick: () => runToolkitAdb(["shell", "getprop", "ro.build.version.release"]) }, toDisplayString(t("androidVersion")), 1),
-                createBaseVNode("button", { class: "secondary compact", onClick: () => runToolkitAdb(["shell", "dumpsys", "battery"]) }, toDisplayString(t("battery")), 1)
+                createBaseVNode("button", { class: "secondary compact", onClick: () => refreshDevices() }, toDisplayString(t("refresh")), 1)
+              ]),
+              createBaseVNode("div", { class: "toolkit-subtitle" }, toDisplayString(t("toolkitAdbDeviceTitle")), 1),
+              createBaseVNode("div", { class: "toolkit-grid" }, [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(TOOLKIT_DEVICE_COMMANDS, (cmd) => {
+                    return openBlock(), createElementBlock("button", {
+                      key: cmd.id,
+                      class: "secondary compact tk-cmd",
+                      "data-tip": cmd.desc,
+                      "data-cmd": cmd.args.join(" ").slice(0, 75),
+                      onClick: () => runToolkitAdb(cmd.args)
+                    }, toDisplayString(cmd.label), 1);
+                  }), 128))
+              ]),
+              createBaseVNode("div", { class: "toolkit-subtitle" }, toDisplayString(t("toolkitAdbControlTitle")), 1),
+              createBaseVNode("div", { class: "toolkit-grid" }, [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(TOOLKIT_CONTROL_COMMANDS, (cmd) => {
+                    return openBlock(), createElementBlock("button", {
+                      key: cmd.id,
+                      class: "secondary compact tk-cmd",
+                      "data-tip": cmd.desc,
+                      "data-cmd": cmd.args.join(" ").slice(0, 75),
+                      onClick: () => runToolkitAdb(cmd.args)
+                    }, toDisplayString(cmd.label), 1);
+                  }), 128))
+              ]),
+              createBaseVNode("div", { class: "toolkit-subtitle" }, toDisplayString(t("toolkitAdbAppsTitle")), 1),
+              createBaseVNode("div", { class: "toolkit-grid" }, [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(TOOLKIT_APP_COMMANDS, (cmd) => {
+                    return openBlock(), createElementBlock("button", {
+                      key: cmd.id,
+                      class: "secondary compact tk-cmd",
+                      "data-tip": cmd.desc,
+                      "data-cmd": cmd.args.join(" ").slice(0, 75),
+                      onClick: () => runToolkitAdb(cmd.args)
+                    }, toDisplayString(cmd.label), 1);
+                  }), 128))
               ])
             ]),
-            createBaseVNode("div", { class: "toolkit-section" }, [
+createBaseVNode("div", { class: "toolkit-section" }, [
               createBaseVNode("div", { class: "toolkit-section-title" }, toDisplayString(t("toolkitShizukuTitle")), 1),
               createBaseVNode("div", { class: "toolkit-row" }, [
                 createBaseVNode("button", { class: "secondary compact", onClick: () => shizukuAction("start") }, toDisplayString(t("toolkitShizukuStart")), 1),
@@ -14735,6 +14803,23 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 createBaseVNode("button", { class: "secondary compact", onClick: () => shizukuAction("status") }, toDisplayString(t("toolkitShizukuStatus")), 1)
               ]),
               createBaseVNode("p", { class: "muted" }, toDisplayString(t("toolkitShizukuHint")), 1)
+            ]),
+createBaseVNode("div", { class: "toolkit-section" }, [
+              createBaseVNode("div", { class: "toolkit-section-title" }, toDisplayString(t("scripts")), 1),
+              createBaseVNode("p", { class: "muted" }, toDisplayString(t("scriptsHint")), 1),
+              createBaseVNode("div", { class: "tk-scripts" }, [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(SCRCPY_SCRIPTS, (script) => {
+                  return openBlock(), createElementBlock("label", { key: script.id, class: "toggle" }, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": ($event) => config.scripts[script.id] = $event,
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.scripts[script.id]]
+                    ]),
+                    createBaseVNode("span", { title: script.args }, toDisplayString(script.label), 1)
+                  ]);
+                }), 128))
+              ])
             ]),
             createBaseVNode("div", { class: "toolkit-section" }, [
               createBaseVNode("div", { class: "toolkit-section-title" }, toDisplayString(t("toolkitCommandTitle")), 1),
