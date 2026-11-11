@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add Boot + Toolkit side panels, their functions and i18n."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets')
+B = pathlib.Path('renderer/assets')
 p = B / 'index-Df8DQ038.js'
 s = p.read_text(encoding='utf-8')
 

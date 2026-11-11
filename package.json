@@ -1,6 +1,6 @@
 {
   "name": "ultimate-scrcpygui",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "productName": "UltimateSCRCPYGui",
   "description": "UltimateSCRCPYGui - a custom Scrcpy GUI build with one-click wireless ADB for Android 10 and below",
   "author": "Ryuupyroxi",
@@ -19,11 +19,17 @@
   "dependencies": {
     "vue": "^3.5.44"
   },
+  "devDependencies": {
+    "electron": "^43.8.3",
+    "electron-builder": "^26.15.3"
+  },
   "scripts": {
     "start": "electron .",
-    "build:linux": "electron-builder --linux AppImage",
-    "build:windows": "electron-builder --win portable nsis",
-    "pack:asar": "asar pack out resources/app.asar"
+    "prepare:out": "node scripts/prepare-out.mjs",
+    "prepare:resources": "node scripts/prepare-resources.mjs",
+    "build:linux": "npm run prepare:out && npm run prepare:resources && electron-builder --linux AppImage",
+    "build:windows": "npm run prepare:out && npm run prepare:resources && electron-builder --win portable nsis",
+    "deploy:appdir": "node scripts/deploy-appdir.mjs"
   },
   "build": {
     "appId": "com.ultimate.scrcpygui",
@@ -33,10 +39,30 @@
       "buildResources": "build"
     },
     "files": [
-      "main/**",
-      "preload/**",
-      "renderer/**",
+      "out/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/LICENSE.scrcpy-gui.txt",
+        "to": "LICENSE.scrcpy-gui.txt"
+      },
+      {
+        "from": "resources/THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "resources/scrcpy",
+        "to": "scrcpy"
+      },
+      {
+        "from": "resources/icons",
+        "to": "icons"
+      },
+      {
+        "from": "resources/tools",
+        "to": "tools"
+      }
     ],
     "linux": {
       "target": [

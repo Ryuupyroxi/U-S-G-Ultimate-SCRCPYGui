@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Styling pass: more contrast, bolder borders, slightly bolder type."""
 import pathlib
-p = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets/index-BTfMtGJj.css')
+p = pathlib.Path('renderer/assets/index-BTfMtGJj.css')
 s = p.read_text(encoding='utf-8')
 orig = s
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const CDP = 'http://127.0.0.1:9222';
-const OUT = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/usgui/verify-now';
+const OUT = 'verify-now';
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const targets = await (await fetch(CDP + '/json')).json();
 const page = targets.find(t => t.type === 'page');

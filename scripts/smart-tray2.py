@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tray preload bridge + renderer listener (main already patched)."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out')
+B = pathlib.Path('.')
 
 p = B / 'preload/preload.js'
 t = p.read_text(encoding='utf-8')

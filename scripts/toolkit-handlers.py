@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Toolkit IPC handlers: adb runner, Shizuku, SSH tunnel, per-device terminal, adb server."""
 import pathlib
-p = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/main/main.js')
+p = pathlib.Path('main/main.js')
 s = p.read_text(encoding='utf-8')
 anchor = 'handle("device:qr-pair-cancel", (_event, name) => {'
 assert s.count(anchor) == 1

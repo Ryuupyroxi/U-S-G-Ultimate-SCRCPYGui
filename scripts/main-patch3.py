@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Main: QR pairing handlers (start + wait/pair)."""
-P = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/main/main.js'
+P = 'main/main.js'
 s = open(P, encoding='utf-8').read()
 orig = s
 

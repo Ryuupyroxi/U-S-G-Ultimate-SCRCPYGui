@@ -36,9 +36,12 @@ This repository contains the patched Electron application source (`main/`, `prel
 
 ```bash
 npm install
-npm run build:linux    # AppImage
-npm run build:windows  # Windows portable + installer (requires wine on Linux)
+npm run prepare:resources   # copies the bundled scrcpy/adb/tools into resources/ (~46 MB, not in git)
+npm run build:linux         # AppImage -> dist/
+npm run deploy:appdir       # optional: put the built app.asar into the live AppDir
 ```
+
+`resources/scrcpy`, `resources/icons` and `resources/tools` are not kept in git. `npm run prepare:resources` copies them from an extracted AppImage on this machine; point `USGUI_RESOURCE_SOURCE` at another `resources/` directory if you keep them elsewhere. `npm run deploy:appdir` writes the AppImage's `app.asar` to `/home/Ryuu/Applications/Ultimate-Scrcpy/resources/app.asar` (override with `USGUI_APPDIR`) and leaves a `.pre-deploy` rollback copy.
 
 ## License
 

@@ -1,4 +1,25 @@
-# UltimateSCRCPYGui v1.1.2
+# UltimateSCRCPYGui v1.1.3
+
+A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork of [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) v2.5.0 (MIT).
+
+## Fixed
+
+- **25 Toolkit presets silently lost their state.** The main process only allowlisted 6 preset IDs (`gaming`, `battery-saver`, `presentation`, `compatibility`, `safe-exit`, `no-cleanup`) while the renderer rendered all 31. Every other preset — Low latency, Keep screen off/on, Fullscreen, Forward audio, Rotate 90 degrees, Duplicate audio, No mipmaps, and so on — could be switched on but was never written to `config.json`, so it was always off again after a restart. `main.js` now carries the full 31-entry allowlist, and a guard (`scripts/scan-script-ids.py`) fails the build if the two lists ever drift again.
+- **Preset flags are now validated against scrcpy itself.** `scripts/validate-scripts.py` reads the presets from the renderer bundle, checks every flag against `scrcpy --help`, and flags any flag the GUI already manages itself (so a preset cannot fight the UI's own toggles). Run it after adding a preset.
+
+## Changed
+
+- **The repository now builds the AppImage from source.** `npm install && npm run build:linux` mirrors `main/`, `preload/` and `renderer/` into `out/`, copies the bundled `scrcpy`/`adb`/`tools` into `resources/`, and hands everything to `electron-builder`. The old "extract the AppImage, patch `app.asar`, re-squash" workflow is no longer needed to produce a release.
+- **`npm run deploy:appdir`** replaces the live AppDir's `resources/app.asar` with the one from the built AppImage (keeping a `.pre-deploy` rollback copy). The previous `pack:asar` script was removed — `asar pack out` omits `node_modules` (vue), which produces a blank window.
+- The patch scripts under `scripts/` now use repo-relative paths, so they run from a fresh clone.
+
+## source build requirements
+
+`resources/scrcpy`, `resources/icons` and `resources/tools` (~46 MB) are not kept in git; `npm run prepare:resources` copies them from an extracted AppImage on this machine. Point `USGUI_RESOURCE_SOURCE` at another `resources/` directory if you keep them elsewhere.
+
+---
+
+## v1.1.2
 
 A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork of [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) v2.5.0 (MIT).
 

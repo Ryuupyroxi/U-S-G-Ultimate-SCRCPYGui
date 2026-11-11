@@ -1,7 +1,13 @@
 node_modules/
 dist/
+out/
 out.AppImage
 *.log
 .DS_Store
 __pycache__/
 *.pyc
+*.broken
+# Bundled scrcpy/adb/tools (~46 MB) are copied in by scripts/prepare-resources.mjs
+resources/scrcpy/
+resources/icons/
+resources/tools/

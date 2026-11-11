@@ -2,7 +2,7 @@
 """Rename to UltimateSCRCPYGui + image logo/title in the header."""
 import re, json, pathlib
 
-BASE = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar')
+BASE = pathlib.Path('.')
 
 def sub_file(path, pairs, must=True):
     p = BASE / path
@@ -17,7 +17,7 @@ def sub_file(path, pairs, must=True):
     print("%s: %d -> %d bytes" % (path, len(orig), len(s)))
 
 # 1) renderer markup: images instead of the red square + plain text
-sub_file('out/renderer/assets/index-Df8DQ038.js', [
+sub_file('renderer/assets/index-Df8DQ038.js', [
     ('_cache[157] || (_cache[157] = createBaseVNode("span", { class: "brand-mark brand-mark-us" }, "U-S", -1)),',
      'createBaseVNode("img", { class: "brand-logo", src: "./assets/logo.png", alt: "", draggable: false }),'),
     ('_cache[156] || (_cache[156] = createBaseVNode("strong", null, "UltimateSCRCPY", -1)),',
@@ -25,8 +25,8 @@ sub_file('out/renderer/assets/index-Df8DQ038.js', [
 ], must=False)
 
 # 2) global rename in main + renderer
-sub_file('out/main/main.js', [("Ultimate Scrcpy", "UltimateSCRCPYGui")])
-sub_file('out/renderer/assets/index-Df8DQ038.js', [("Ultimate Scrcpy", "UltimateSCRCPYGui")])
+sub_file('main/main.js', [("Ultimate Scrcpy", "UltimateSCRCPYGui")])
+sub_file('renderer/assets/index-Df8DQ038.js', [("Ultimate Scrcpy", "UltimateSCRCPYGui")])
 
 # 3) package.json identity
 pkg = BASE / 'package.json'
@@ -38,7 +38,7 @@ pkg.write_text(json.dumps(d, indent=2) + "\n", encoding='utf-8')
 print("package.json updated:", d['name'], '/', d['productName'])
 
 # 4) CSS for the image brand
-css = BASE / 'out/renderer/assets/index-BTfMtGJj.css'
+css = BASE / 'renderer/assets/index-BTfMtGJj.css'
 s = css.read_text(encoding='utf-8')
 add = (".brand-logo { display: block; width: 32px; height: auto; }\n"
        ".brand-title { display: block; height: 25px; width: auto; }\n"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add the toolkit config section (SSH tunnel, per-instance terminal, recent/most-used commands)."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out')
+B = pathlib.Path('.')
 m = B / 'main/main.js'
 s = m.read_text(encoding='utf-8')
 

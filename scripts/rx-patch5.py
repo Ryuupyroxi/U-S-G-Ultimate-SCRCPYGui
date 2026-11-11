@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Renderer part 5: QR pairing UI."""
-P = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets/index-Df8DQ038.js'
+P = 'renderer/assets/index-Df8DQ038.js'
 s = open(P, encoding='utf-8').read()
 orig = s
 

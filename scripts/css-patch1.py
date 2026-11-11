@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """CSS: top header + collapsible sidebar."""
-P = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets/index-BTfMtGJj.css'
+P = 'renderer/assets/index-BTfMtGJj.css'
 s = open(P, encoding='utf-8').read()
 orig = s
 

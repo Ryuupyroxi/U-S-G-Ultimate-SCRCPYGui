@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add config export (JSON / .sh / .bat / .command) IPC + UI in Settings > General."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out')
+B = pathlib.Path('.')
 
 # ---------- main ----------
 m = B / 'main/main.js'

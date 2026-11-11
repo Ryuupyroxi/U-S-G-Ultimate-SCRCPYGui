@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Header: logo left, title centred in the window, controls right."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets')
+B = pathlib.Path('renderer/assets')
 
 # --- markup: pull the title out of .brand so it can centre against the header
 p = B / 'index-Df8DQ038.js'

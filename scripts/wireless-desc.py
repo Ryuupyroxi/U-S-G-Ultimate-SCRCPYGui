@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Make the Android 10- description structurally identical to the Android 11+ one."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets')
+B = pathlib.Path('renderer/assets')
 
 p = B / 'index-Df8DQ038.js'
 s = p.read_text(encoding='utf-8')

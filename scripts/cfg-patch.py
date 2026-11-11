@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Add swipePanel / navBar / qrPairing / scripts to the config schema and flow."""
-P = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/main/main.js'
+P = 'main/main.js'
 s = open(P, encoding='utf-8').read()
 orig = s
 

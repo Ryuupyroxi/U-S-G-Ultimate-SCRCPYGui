@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const CDP = 'http://127.0.0.1:9222';
-const OUT = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/usgui/shots2';
+const OUT = 'shots2';
 fs.mkdirSync(OUT, { recursive: true });
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 async function connect() {

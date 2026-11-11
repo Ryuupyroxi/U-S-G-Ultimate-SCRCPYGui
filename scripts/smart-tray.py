@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Smart tray icon (green/orange/red) + per-device start/stop menu."""
 import pathlib
-B = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out')
+B = pathlib.Path('.')
 
 m = B / 'main/main.js'
 s = m.read_text(encoding='utf-8')

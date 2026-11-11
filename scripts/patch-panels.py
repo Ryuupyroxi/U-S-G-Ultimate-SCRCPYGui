@@ -2,10 +2,10 @@
 """UltimateSCRCPYGui: add Settings > Panels (sidebar order + visibility)."""
 import re, sys, pathlib
 
-APP = pathlib.Path("/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/usgui/app")
-MAIN = APP / "out/main/main.js"
-RENDER = APP / "out/renderer/assets/index-Df8DQ038.js"
-CSS = APP / "out/renderer/assets/index-BTfMtGJj.css"
+APP = pathlib.Path(".")
+MAIN = APP / "main/main.js"
+RENDER = APP / "renderer/assets/index-Df8DQ038.js"
+CSS = APP / "renderer/assets/index-BTfMtGJj.css"
 
 def patch(path, repls):
     s = path.read_text(encoding="utf-8")

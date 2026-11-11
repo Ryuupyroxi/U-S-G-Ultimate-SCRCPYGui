@@ -1,57 +1,70 @@
 #!/usr/bin/env python3
-"""Validate the proposed script preset flags against scrcpy --help and the managed-flag list."""
-import re, subprocess, pathlib
+"""Validate the Toolkit script presets against scrcpy --help and the GUI's
+managed-flag list.
 
-SCRCPY = '/home/Ryuu/Applications/Ultimate-Scrcpy/resources/scrcpy/scrcpy'
-help_text = subprocess.run([SCRCPY, '--help'], capture_output=True, text=True).stdout
-valid = set(re.findall(r'^\s+(?:-[a-zA-Z], )?(--[a-z0-9-]+)', help_text, re.M))
+Presets are read from the renderer bundle (the single source of truth for what
+the Toolkit renders); the managed flags come from main/main.js. A preset flag
+that scrcpy does not know, or that the GUI already owns, is a problem: the GUI
+would either pass an invalid flag or fight the preset.
 
-main = pathlib.Path('/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/main/main.js').read_text()
+Usage: python3 scripts/validate-scripts.py
+Exit code 0 = clean, 1 = problems.
+"""
+import re, subprocess, pathlib, sys
+
+root = pathlib.Path(__file__).resolve().parent.parent
+bundle_path = root / "renderer/assets/index-Df8DQ038.js"
+main_path = root / "main/main.js"
+
+scrcpy = None
+for candidate in (root / "resources/scrcpy/scrcpy",
+                  pathlib.Path("/home/Ryuu/Applications/Ultimate-Scrcpy/resources/scrcpy/scrcpy")):
+    if candidate.exists():
+        scrcpy = candidate
+        break
+if scrcpy is None:
+    raise SystemExit("scrcpy binary not found (run scripts/prepare-resources.mjs first)")
+
+help_text = subprocess.run([str(scrcpy), "--help"], capture_output=True, text=True).stdout
+valid = set(re.findall(r"^\s+(?:-[a-zA-Z], )?(--[a-z0-9-]+)", help_text, re.M))
+
+main = main_path.read_text(encoding="utf-8")
 managed = set(re.findall(r'flag: "([^"]+)"', main))
 managed |= set(re.findall(r'\["(--[a-z0-9-]+)",', main))
-managed |= {'--serial', '-s', '--no-playback', '--no-window', '--window-y', '--window-height'}
+managed |= {"--serial", "-s", "--no-playback", "--no-window", "--window-y", "--window-height"}
+known_keys = set(re.findall(r'\{ key: "([^"]+)"', main))
+known_keys |= set(re.findall(r'flag: "[^"]+",\s*[^,]+,\s*"([A-Za-z0-9_]+)"', main))
+known_keys |= {"audio", "audioDup", "rotation90", "borderless", "turnScreenOff", "stayAwake",
+               "fullscreen", "audioSource", "recordEnabled", "videoEncoder", "videoCodec",
+               "audioCodec", "audioEncoder", "mouseMode", "keyboardMode", "shortcutModifier"}
 
-SCRIPTS = [
-    ("gaming", "Gaming", "--no-mipmaps --no-mouse-hover --raw-key-events --disable-screensaver"),
-    ("battery-saver", "Battery saver", "--disable-screensaver --no-clipboard-autosync --no-terminal-title --no-cleanup"),
-    ("presentation", "Presentation", "--print-fps --disable-screensaver --no-cleanup"),
-    ("compatibility", "Compatibility", "--no-mipmaps --legacy-paste --prefer-text --no-mouse-hover --no-key-repeat"),
-    ("safe-exit", "Safe exit", "--pause-on-exit --power-off-on-close"),
-    ("no-cleanup", "No cleanup", "--no-cleanup --no-clipboard-autosync"),
-    ("low-latency", "Low latency", "--no-mipmaps --no-mouse-hover --raw-key-events --no-downsize-on-error --min-size-alignment=1"),
-    ("screen-off-timeout", "Long screen-off timeout", "--screen-off-timeout=1800"),
-    ("fill-display", "Fill display", "--render-fit=fill"),
-    ("black-background", "Black background", "--background-color=#000000"),
-    ("rotate-90", "Rotate 90 degrees", "--angle=90"),
-    ("force-adb-forward", "Force ADB forward", "--force-adb-forward"),
-    ("kill-adb-on-close", "Kill ADB on close", "--kill-adb-on-close"),
-    ("no-terminal-title", "No terminal title", "--no-terminal-title"),
-    ("print-fps", "Print FPS", "--print-fps"),
-    ("require-audio", "Require audio", "--require-audio"),
-    ("audio-dup", "Duplicate audio", "--audio-dup"),
-    ("no-key-repeat", "No key repeat", "--no-key-repeat"),
-    ("no-mouse-hover", "No mouse hover", "--no-mouse-hover"),
-    ("raw-key-events", "Raw key events", "--raw-key-events"),
-    ("prefer-text", "Prefer text", "--prefer-text"),
-    ("legacy-paste", "Legacy paste", "--legacy-paste"),
-    ("no-downsize-on-error", "No downsize on error", "--no-downsize-on-error"),
-    ("no-clipboard-autosync", "No clipboard sync", "--no-clipboard-autosync"),
-    ("disable-screensaver", "Disable screensaver", "--disable-screensaver"),
-    ("no-mipmaps", "No mipmaps", "--no-mipmaps"),
-    ("no-power-on", "No power on", "--no-power-on"),
-]
+src = bundle_path.read_text(encoding="utf-8", errors="replace")
+m = re.search(r"const SCRCPY_SCRIPTS = \[(.*?)\n\];", src, re.S)
+if not m:
+    raise SystemExit("SCRCPY_SCRIPTS array not found in the renderer bundle")
+body = m.group(1)
+presets = re.findall(r'\{ id: "([^"]+)", label: "([^"]+)", desc: "(?:[^"\\]|\\.)*", (args: "(?:[^"\\]|\\.)*"|set: \{[^}]*\}) \}', body)
 
 bad = []
-for sid, label, args in SCRIPTS:
-    for tok in args.split():
-        flag = tok.split('=')[0]
-        if flag not in valid:
-            bad.append((sid, tok, 'NOT IN scrcpy --help'))
-        elif flag in managed:
-            bad.append((sid, tok, 'MANAGED by GUI'))
-print("total presets:", len(SCRIPTS))
+for pid, label, tail in presets:
+    if tail.startswith("args:"):
+        args = tail[len("args: "):].strip().strip('"')
+        for tok in args.split():
+            flag = tok.split("=")[0]
+            if flag not in valid:
+                bad.append((pid, tok, "NOT IN scrcpy --help"))
+            elif flag in managed:
+                bad.append((pid, tok, "MANAGED by GUI"))
+    else:
+        sett = tail[len("set: "):].strip().strip("{}")
+        for key in re.findall(r'([A-Za-z0-9_]+):', sett):
+            if key not in known_keys:
+                bad.append((pid, key, "UNKNOWN launch key"))
+
+print(f"presets checked: {len(presets)}")
 if bad:
     print("PROBLEMS:")
-    for b in bad: print("  ", b)
-else:
-    print("all flags valid and unmanaged")
+    for b in bad:
+        print("  ", b)
+    sys.exit(1)
+print("all preset flags valid, unmanaged, and all set keys known")

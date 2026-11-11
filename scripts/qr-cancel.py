@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Add QR pairing cancel: main flag, preload bridge, renderer wiring."""
-MP = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/main/main.js'
+MP = 'main/main.js'
 s = open(MP, encoding='utf-8').read()
 
 def rep(s, old, new):
@@ -27,7 +27,7 @@ open(MP, 'w', encoding='utf-8').write(s)
 print("main patched")
 
 # preload
-PP = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/preload/preload.js'
+PP = 'preload/preload.js'
 t = open(PP, encoding='utf-8').read()
 old = '  waitQrPairing: (runtime, serial, name, password, timeout) => electron.ipcRenderer.invoke("device:qr-pair-wait", runtime, serial, name, password, timeout),'
 assert t.count(old) == 1
@@ -36,7 +36,7 @@ open(PP, 'w', encoding='utf-8').write(t)
 print("preload patched")
 
 # renderer
-RP = '/home/Ryuu/.hermes/profiles/fenrys/cache/scratch/app-asar/out/renderer/assets/index-Df8DQ038.js'
+RP = 'renderer/assets/index-Df8DQ038.js'
 u = open(RP, encoding='utf-8').read()
 old2 = '''    function closeQrModal() {
       qrModal.value = false;
