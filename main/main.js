@@ -74,11 +74,12 @@ function serializeSceneOptions(config, platform) {
   if (VISUAL_SCENES.has(config.scene)) {
     const hasVideo = config.scene !== "record-only" || config.recordVideo;
     const hasAudio = config.scene !== "record-only" || config.recordAudio;
+    const audioEnabled = hasAudio && config.audio !== false;
     add(group$1("videoEncoder", "--video-encoder", "video", "videoEncoder", hasVideo && config.videoEncoder.trim() ? [`--video-encoder=${config.videoEncoder.trim()}`] : []));
-    add(group$1("audioCodec", "--audio-codec", "video", "audioCodec", !hasAudio || config.audioCodec === "default" ? [] : [`--audio-codec=${config.audioCodec}`]));
-    add(group$1("audioEncoder", "--audio-encoder", "video", "audioEncoder", hasAudio && config.audioEncoder.trim() ? [`--audio-encoder=${config.audioEncoder.trim()}`] : []));
-    add(group$1("audioSource", "--audio-source", "video", "audioSource", !hasAudio ? [] : config.audioDup ? ["--audio-source=playback"] : config.audioSource === "default" ? [] : [`--audio-source=${config.audioSource}`]));
-    add(group$1("audioDup", "--audio-dup", "video", "audioDup", hasAudio && config.audioDup ? ["--audio-dup"] : []));
+    add(group$1("audioCodec", "--audio-codec", "video", "audioCodec", !audioEnabled || config.audioCodec === "default" ? [] : [`--audio-codec=${config.audioCodec}`]));
+    add(group$1("audioEncoder", "--audio-encoder", "video", "audioEncoder", audioEnabled && config.audioEncoder.trim() ? [`--audio-encoder=${config.audioEncoder.trim()}`] : []));
+    add(group$1("audioSource", "--audio-source", "video", "audioSource", !audioEnabled ? [] : config.audioDup ? ["--audio-source=playback"] : config.audioSource === "default" ? [] : [`--audio-source=${config.audioSource}`]));
+    add(group$1("audioDup", "--audio-dup", "video", "audioDup", audioEnabled && config.audioDup ? ["--audio-dup"] : []));
     add(group$1("rotation90", "--angle", "video", "rotate90", config.rotation90 ? ["--angle=90"] : []));
     add(group$1("timeLimit", "--time-limit", "recording", "timeLimit", config.timeLimit > 0 ? [`--time-limit=${Math.trunc(config.timeLimit)}`] : []));
     add(group$1("recordFormat", "--record-format", "recording", "recordFormat", config.recordEnabled && config.recordFormat !== "default" ? [`--record-format=${config.recordFormat}`] : []));

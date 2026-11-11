@@ -7440,7 +7440,7 @@ const en = {
   keepScreenOnDesc: "Keep the device screen on while connected (--stay-awake)",
   fullscreenDesc: "Launch in fullscreen mode (--fullscreen)",
   borderlessDesc: "Launch with a borderless window (--window-borderless)",
-  audioForwardingDesc: "Forward device audio to the computer (--audio-source=output)",
+  audioForwardingDesc: "Forward device audio to the computer (--no-audio disables it)",
   audioDuplicationDesc: "Duplicate audio to both device and computer (--audio-source=playback --audio-dup)",
   rotate90Desc: "Rotate the display 90 degrees clockwise (--angle=90)",
   virtualDisplayLifecycle: "Virtual display lifecycle",
@@ -8066,7 +8066,7 @@ const zhCN = {
   keepScreenOnDesc: "连接期间保持设备屏幕常亮 (--stay-awake)",
   fullscreenDesc: "以全屏模式启动 (--fullscreen)",
   borderlessDesc: "以无边框窗口启动 (--window-borderless)",
-  audioForwardingDesc: "将设备音频转发到电脑 (--audio-source=output)",
+  audioForwardingDesc: "将设备音频转发到电脑（--no-audio 可关闭）",
   audioDuplicationDesc: "同时输出音频到设备和电脑 (--audio-source=playback --audio-dup)",
   rotate90Desc: "将显示顺时针旋转 90 度 (--angle=90)",
   virtualDisplayLifecycle: "虚拟显示器生命周期",
@@ -9620,10 +9620,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     });
     const sceneKinds = ["screen", "camera", "virtual-display", "record-only", "control-only", "otg"];
     const audioForward = computed({
-      get: () => config.launch.audioSource === "output",
+      get: () => config.launch.audio !== false,
       set: (value) => {
-        config.launch.audioSource = value ? "output" : "default";
-        if (value) config.launch.audio = true;
+        config.launch.audio = value === true;
       }
     });
     const audioDuplication = computed({
@@ -9633,6 +9632,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         if (value) {
           config.launch.audio = true;
           config.launch.audioSource = "playback";
+        } else if (config.launch.audioSource === "playback") {
+          config.launch.audioSource = "default";
         }
       }
     });
@@ -11497,14 +11498,7 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                       [vModelCheckbox, config.navBar]
                     ]),
                     createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
-                  ])
-                ]),
-                createBaseVNode("div", { class: "display-options-inline" }, [
-                  createBaseVNode("div", null, [
-                    createBaseVNode("strong", null, toDisplayString(t("displayOptions")), 1),
-                    createBaseVNode("small", null, toDisplayString(t("displayOptionsHint")), 1)
                   ]),
-                  createBaseVNode("div", { class: "toggle-grid" }, [
                     createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOffDesc") }, [
                       withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.turnScreenOff = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.turnScreenOff] ]),
                       createBaseVNode("span", null, toDisplayString(t("keepScreenOff")), 1)
@@ -11533,7 +11527,6 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                       withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.rotation90 = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.rotation90] ]),
                       createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
                     ])
-                  ])
                 ]),
                                 ])) : createCommentVNode("", true),
                 config.launch.scene === "camera" ? (openBlock(), createElementBlock("section", _hoisted_46, [

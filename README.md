@@ -8,8 +8,9 @@ A custom build of the [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) (v2
 
 - **One-click wireless ADB for Android 10 and below** — plug in a device, press the button, and the app enables `tcpip 5555`, reads the IP and connects. Constant caption, dynamic status line.
 - **QR code pairing (Android 11+)** — optional toggle in the wireless panel. The app generates the pairing QR (`WIFI:T:ADB;S:…;P:…;;`), the phone scans it with its camera, then the app polls mDNS, runs `adb pair` and auto-connects. Manual address/code pairing is untouched.
-- **Swipe panel + Android navigation bar** — optional floating panels (Settings → Controls), off by default.
-- **Scripts** — 27 scrcpy argument presets as checkboxes in Settings → Advanced, appended to the launch arguments.
+- **Swipe panel + Android navigation bar** — optional floating panels, off by default.
+- **Display options in the scene panels** — seven launch toggles (Keep screen off, Keep screen on, Fullscreen, Borderless window, Audio forwarding, Audio duplication, Rotate 90°) with hover tooltips, in Devices → Screen and Devices → Virtual display.
+- **Scripts** — scrcpy argument presets as switches in the Toolkit, appended to the launch arguments.
 - **Drag-and-drop file push** — drop a file anywhere in the window to copy it to the Drag-and-drop target folder on the device.
 - **Themes** — light / dark / OLED, 8 accent schemes, primary/secondary reversal.
 - **Toolkit panel** — ADB quick actions, Shizuku start/stop/status, a command runner with recent and most-used commands, optional SSH tunnel and per-instance terminal.
