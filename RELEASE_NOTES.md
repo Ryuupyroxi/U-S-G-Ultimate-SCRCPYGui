@@ -1,4 +1,4 @@
-# UltimateSCRCPYGui v1.1.1
+# UltimateSCRCPYGui v1.1.2
 
 A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork of [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) v2.5.0 (MIT).
 
@@ -9,7 +9,15 @@ A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork 
 - **Shizuku status / Toolkit commands did nothing.** Three Vue vnodes were built with a PROPS patch flag but no `dynamicProps` array (the QR-pair button and the device `<option>` in the Boot and Toolkit selects). Vue threw `Cannot read properties of null (reading 'length')` on every device-list update, which aborted rendering on those panels so command output never appeared. All three are fixed, and a scanner (`scripts/scan-patchflags.py`) now guards against regressions.
 - **Settings → Panels ate its own rows.** Unticking a panel removed it from the settings list as well as the sidebar, so it could not be re-enabled. The list now shows every panel; only the sidebar hides.
 
-## Changed
+## Changed in v1.1.2
+
+- **Sidebar collapse button moved to the side edge** like a manila folder tab — always visible whether the sidebar is open or collapsed, with a clear tooltip.
+- **Display options integrated into scene panels** — the six toggles (Keep screen off, Keep screen on, Fullscreen, Audio forwarding, Audio duplication, Rotate 90°) now live in **Devices → Screen → Physical display source** and **Devices → Virtual display → Virtual display lifecycle** instead of a separate card. Each toggle has a hover tooltip describing its scrcpy flag. Borderless window option added to both panels.
+- **Settings → Geometry (Window) cleaned up** — display-related toggles removed; only window-behavior switches remain (Always on top, Control, Show touches, Lock aspect ratio).
+- **"Select the first available device automatically" moved to Settings → Advanced** — grouped with other global toggles (Accent scheme, Extra args).
+- **Virtual display lifecycle panel added** — System decorations and Destroy content on close toggles now have a dedicated UI in the Virtual display scene.
+
+## Changed in v1.1.1
 
 - **Boot moved into the Toolkit.** The Boot side panel is gone (7 panels instead of 8); reboot / recovery / bootloader / safe mode / wake / sleep / power off are the first Toolkit section and share its device selector.
 - **Scripts moved into the Toolkit.** The 27 scrcpy argument presets are no longer a column in Settings → Advanced.
