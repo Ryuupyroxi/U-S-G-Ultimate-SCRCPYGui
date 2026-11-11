@@ -17,6 +17,7 @@ A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork 
 - **Settings → Controls is now just two switches** — "Show swipe panel" and "Show Android navigation bar". The other ten options moved to Settings → Window.
 - **Every checkbox is now a switch** filled with the secondary accent colour (it follows the selected accent scheme and the "Reverse order" toggle).
 - **Virtual display options** are laid out so "Resize with window" sits directly under "Destroy content on close".
+- **A "Display" card now sits in both the Screen and the Virtual display scene** (Devices → Launch scene) with six launch toggles: Keep screen off (`--turn-screen-off`), Keep screen on (`--stay-awake`), Fullscreen (`--fullscreen`), Audio forwarding (`--audio-source=output`), Audio duplication (`--audio-source=playback --audio-dup`) and Rotate 90 degrees (`--angle=90`). Audio duplication and the 90° rotation are new options; the other four reuse the existing launch settings, so anything toggled there is reflected in Settings → Window and in the command preview.
 
 ## Features carried over from v1.0.0-alpha
 

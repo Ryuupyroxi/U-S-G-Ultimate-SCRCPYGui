@@ -25,6 +25,8 @@ const SCENE_MANAGED_FLAGS = [
   ["--audio-codec", "audioCodec"],
   ["--audio-encoder", "audioEncoder"],
   ["--audio-source", "audioSource"],
+  ["--audio-dup", "audioDup"],
+  ["--angle", "rotation90"],
   ["--time-limit", "timeLimit"],
   ["--record-format", "recordFormat"],
   ["--record-orientation", "recordOrientation"],
@@ -74,7 +76,9 @@ function serializeSceneOptions(config, platform) {
     add(group$1("videoEncoder", "--video-encoder", "video", "videoEncoder", hasVideo && config.videoEncoder.trim() ? [`--video-encoder=${config.videoEncoder.trim()}`] : []));
     add(group$1("audioCodec", "--audio-codec", "video", "audioCodec", !hasAudio || config.audioCodec === "default" ? [] : [`--audio-codec=${config.audioCodec}`]));
     add(group$1("audioEncoder", "--audio-encoder", "video", "audioEncoder", hasAudio && config.audioEncoder.trim() ? [`--audio-encoder=${config.audioEncoder.trim()}`] : []));
-    add(group$1("audioSource", "--audio-source", "video", "audioSource", !hasAudio || config.audioSource === "default" ? [] : [`--audio-source=${config.audioSource}`]));
+    add(group$1("audioSource", "--audio-source", "video", "audioSource", !hasAudio ? [] : config.audioDup ? ["--audio-source=playback"] : config.audioSource === "default" ? [] : [`--audio-source=${config.audioSource}`]));
+    add(group$1("audioDup", "--audio-dup", "video", "audioDup", hasAudio && config.audioDup ? ["--audio-dup"] : []));
+    add(group$1("rotation90", "--angle", "video", "rotate90", config.rotation90 ? ["--angle=90"] : []));
     add(group$1("timeLimit", "--time-limit", "recording", "timeLimit", config.timeLimit > 0 ? [`--time-limit=${Math.trunc(config.timeLimit)}`] : []));
     add(group$1("recordFormat", "--record-format", "recording", "recordFormat", config.recordEnabled && config.recordFormat !== "default" ? [`--record-format=${config.recordFormat}`] : []));
     add(group$1("recordOrientation", "--record-orientation", "recording", "recordOrientation", config.recordEnabled && config.recordOrientation !== "default" ? [`--record-orientation=${config.recordOrientation}`] : []));
@@ -183,8 +187,8 @@ const OPTION_DESCRIPTORS = [
   { key: "alwaysOnTop", flag: "--always-on-top", category: "general", valueType: "boolean", defaultValue: false, helpKey: "alwaysOnTop", minScrcpyVersion: "4.0", scenes: windowed, serialize: (c) => c.alwaysOnTop ? ["--always-on-top"] : [], validate: ok },
   { key: "control", flag: "--no-control", aliases: ["-n"], category: "controls", valueType: "boolean", defaultValue: true, helpKey: "control", minScrcpyVersion: "4.0", scenes: screenVirtual, serialize: (c) => c.control ? [] : ["--no-control"], validate: ok },
   { key: "audio", flag: "--no-audio", category: "video", valueType: "boolean", defaultValue: true, helpKey: "audio", minScrcpyVersion: "4.0", scenes: visualPlayback, serialize: (c) => c.audio ? [] : ["--no-audio"], validate: ok },
-  { key: "turnScreenOff", flag: "--turn-screen-off", aliases: ["-S"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "turnScreenOff", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.turnScreenOff ? ["--turn-screen-off"] : [], validate: ok },
-  { key: "stayAwake", flag: "--stay-awake", aliases: ["-w"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "stayAwake", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.stayAwake ? ["--stay-awake"] : [], validate: ok },
+  { key: "turnScreenOff", flag: "--turn-screen-off", aliases: ["-S"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "turnScreenOff", minScrcpyVersion: "4.0", scenes: screenVirtual, serialize: (c) => c.turnScreenOff ? ["--turn-screen-off"] : [], validate: ok },
+  { key: "stayAwake", flag: "--stay-awake", aliases: ["-w"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "stayAwake", minScrcpyVersion: "4.0", scenes: screenVirtual, serialize: (c) => c.stayAwake ? ["--stay-awake"] : [], validate: ok },
   { key: "showTouches", flag: "--show-touches", aliases: ["-t"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "showTouches", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.showTouches ? ["--show-touches"] : [], validate: ok },
   { key: "fullscreen", flag: "--fullscreen", aliases: ["-f"], category: "general", valueType: "boolean", defaultValue: false, helpKey: "fullscreen", minScrcpyVersion: "4.0", scenes: windowed, serialize: (c) => c.fullscreen ? ["--fullscreen"] : [], validate: ok },
   { key: "borderless", flag: "--window-borderless", category: "general", valueType: "boolean", defaultValue: false, helpKey: "borderless", minScrcpyVersion: "4.0", scenes: windowed, serialize: (c) => c.borderless ? ["--window-borderless"] : [], validate: ok },
@@ -1886,6 +1890,8 @@ function defaultLaunchConfig() {
     audioCodec: "default",
     audioEncoder: "",
     audioSource: "default",
+    audioDup: false,
+    rotation90: false,
     shortcutModifier: optionDefault("shortcutModifier"),
     keyboardMode: optionDefault("keyboardMode"),
     mouseMode: optionDefault("mouseMode"),
@@ -2205,6 +2211,8 @@ function launchConfig(value) {
     audioCodec: enumValue(source.audioCodec, "launch.audioCodec", audioCodecs),
     audioEncoder: boundedString$1(source.audioEncoder, "launch.audioEncoder", 512, true),
     audioSource: enumValue(source.audioSource, "launch.audioSource", audioSources),
+    audioDup: booleanField(source, "audioDup"),
+    rotation90: booleanField(source, "rotation90"),
     shortcutModifier: enumValue(source.shortcutModifier, "launch.shortcutModifier", shortcutModifiers),
     keyboardMode: enumValue(source.keyboardMode, "launch.keyboardMode", keyboardModes),
     mouseMode: enumValue(source.mouseMode, "launch.mouseMode", mouseModes),

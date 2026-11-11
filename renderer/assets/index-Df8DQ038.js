@@ -6890,6 +6890,8 @@ const OPTION_DESCRIPTORS = [
   { key: "alwaysOnTop", flag: "--always-on-top", category: "general", valueType: "boolean", defaultValue: false, helpKey: "alwaysOnTop", minScrcpyVersion: "4.0", scenes: windowed, serialize: (c) => c.alwaysOnTop ? ["--always-on-top"] : [], validate: ok },
   { key: "control", flag: "--no-control", aliases: ["-n"], category: "controls", valueType: "boolean", defaultValue: true, helpKey: "control", minScrcpyVersion: "4.0", scenes: screenVirtual, serialize: (c) => c.control ? [] : ["--no-control"], validate: ok },
   { key: "audio", flag: "--no-audio", category: "video", valueType: "boolean", defaultValue: true, helpKey: "audio", minScrcpyVersion: "4.0", scenes: visualPlayback, serialize: (c) => c.audio ? [] : ["--no-audio"], validate: ok },
+  { key: "audioDup", flag: "--audio-dup", category: "video", valueType: "boolean", defaultValue: false, helpKey: "audioDup", minScrcpyVersion: "5.0", scenes: visualPlayback, serialize: (c) => c.audioDup ? ["--audio-dup"] : [], validate: ok },
+  { key: "rotation90", flag: "--angle", category: "video", valueType: "boolean", defaultValue: false, helpKey: "rotate90", minScrcpyVersion: "4.0", scenes: screenVirtual, serialize: (c) => c.rotation90 ? ["--angle=90"] : [], validate: ok },
   { key: "turnScreenOff", flag: "--turn-screen-off", aliases: ["-S"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "turnScreenOff", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.turnScreenOff ? ["--turn-screen-off"] : [], validate: ok },
   { key: "stayAwake", flag: "--stay-awake", aliases: ["-w"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "stayAwake", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.stayAwake ? ["--stay-awake"] : [], validate: ok },
   { key: "showTouches", flag: "--show-touches", aliases: ["-t"], category: "controls", valueType: "boolean", defaultValue: false, helpKey: "showTouches", minScrcpyVersion: "4.0", scenes: screen, serialize: (c) => c.showTouches ? ["--show-touches"] : [], validate: ok },
@@ -6935,6 +6937,8 @@ function defaultLaunchConfig() {
     audioCodec: "default",
     audioEncoder: "",
     audioSource: "default",
+    audioDup: false,
+    rotation90: false,
     shortcutModifier: optionDefault("shortcutModifier"),
     keyboardMode: optionDefault("keyboardMode"),
     mouseMode: optionDefault("mouseMode"),
@@ -7077,33 +7081,37 @@ function backgroundRecordingLaunch(launch) {
   return { ...launch, recordEnabled: true, autoRecordName: true, recordDirectory: previousRecordingDirectory(launch), recordFormat };
 }
 const SCRCPY_SCRIPTS = [
-  { id: "gaming", label: "Gaming", args: "--no-mipmaps --no-mouse-hover --raw-key-events --disable-screensaver" },
-  { id: "battery-saver", label: "Battery saver", args: "--disable-screensaver --no-clipboard-autosync --no-terminal-title --no-cleanup" },
-  { id: "presentation", label: "Presentation", args: "--print-fps --disable-screensaver --no-cleanup" },
-  { id: "compatibility", label: "Compatibility", args: "--no-mipmaps --legacy-paste --prefer-text --no-mouse-hover --no-key-repeat" },
-  { id: "safe-exit", label: "Safe exit", args: "--pause-on-exit --power-off-on-close" },
-  { id: "no-cleanup", label: "No cleanup", args: "--no-cleanup --no-clipboard-autosync" },
-  { id: "low-latency", label: "Low latency", args: "--no-mipmaps --no-mouse-hover --raw-key-events --no-downsize-on-error --min-size-alignment=1" },
-  { id: "screen-off-timeout", label: "Long screen-off timeout", args: "--screen-off-timeout=1800" },
-  { id: "fill-display", label: "Fill display", args: "--render-fit=fill" },
-  { id: "black-background", label: "Black background", args: "--background-color=#000000" },
-  { id: "rotate-90", label: "Rotate 90 degrees", args: "--angle=90" },
-  { id: "force-adb-forward", label: "Force ADB forward", args: "--force-adb-forward" },
-  { id: "kill-adb-on-close", label: "Kill ADB on close", args: "--kill-adb-on-close" },
-  { id: "no-terminal-title", label: "No terminal title", args: "--no-terminal-title" },
-  { id: "print-fps", label: "Print FPS", args: "--print-fps" },
-  { id: "require-audio", label: "Require audio", args: "--require-audio" },
-  { id: "audio-dup", label: "Duplicate audio", args: "--audio-dup" },
-  { id: "no-key-repeat", label: "No key repeat", args: "--no-key-repeat" },
-  { id: "no-mouse-hover", label: "No mouse hover", args: "--no-mouse-hover" },
-  { id: "raw-key-events", label: "Raw key events", args: "--raw-key-events" },
-  { id: "prefer-text", label: "Prefer text", args: "--prefer-text" },
-  { id: "legacy-paste", label: "Legacy paste", args: "--legacy-paste" },
-  { id: "no-downsize-on-error", label: "No downsize on error", args: "--no-downsize-on-error" },
-  { id: "no-clipboard-autosync", label: "No clipboard sync", args: "--no-clipboard-autosync" },
-  { id: "disable-screensaver", label: "Disable screensaver", args: "--disable-screensaver" },
-  { id: "no-mipmaps", label: "No mipmaps", args: "--no-mipmaps" },
-  { id: "no-power-on", label: "No power on", args: "--no-power-on" }
+  { id: "gaming", label: "Gaming", desc: "Lowest latency for games: no mipmaps, no mouse hover, raw key events, screen stays on.", args: "--no-mipmaps --no-mouse-hover --raw-key-events --disable-screensaver" },
+  { id: "battery-saver", label: "Battery saver", desc: "Less work on the device: no screensaver, no clipboard sync, no terminal title, no cleanup.", args: "--disable-screensaver --no-clipboard-autosync --no-terminal-title --no-cleanup" },
+  { id: "presentation", label: "Presentation", desc: "Show an FPS counter, keep the screen on and leave no state behind on exit.", args: "--print-fps --disable-screensaver --no-cleanup" },
+  { id: "compatibility", label: "Compatibility", desc: "Safest combination for older or quirky devices: no mipmaps, legacy paste, prefer text.", args: "--no-mipmaps --legacy-paste --prefer-text --no-mouse-hover --no-key-repeat" },
+  { id: "safe-exit", label: "Safe exit", desc: "Pause playback and turn the device screen off when scrcpy closes.", args: "--pause-on-exit --power-off-on-close" },
+  { id: "no-cleanup", label: "No cleanup", desc: "Leave the device exactly as it was: no cleanup and no clipboard sync.", args: "--no-cleanup --no-clipboard-autosync" },
+  { id: "low-latency", label: "Low latency", desc: "Minimise latency: no mipmaps, no mouse hover, raw key events, 1-byte size alignment.", args: "--no-mipmaps --no-mouse-hover --raw-key-events --no-downsize-on-error --min-size-alignment=1" },
+  { id: "keep-screen-off", label: "Keep screen off", desc: "Turn the device screen off immediately while mirroring continues (saves phone battery).", set: { turnScreenOff: true } },
+  { id: "keep-screen-on", label: "Keep screen on", desc: "Keep the device awake while scrcpy is running, when the device is plugged in.", set: { stayAwake: true } },
+  { id: "fullscreen", label: "Fullscreen", desc: "Start scrcpy in fullscreen.", set: { fullscreen: true } },
+  { id: "forward-audio", label: "Forward audio", desc: "Forward the device audio output to this computer (re-enables audio and uses the device output).", set: { audio: true, audioSource: "output" } },
+  { id: "black-background", label: "Black background", desc: "Render a black background behind the video.", args: "--background-color=#000000" },
+  { id: "stretch-to-fill", label: "Stretch to fill window", desc: "Fill the whole window, ignoring the device aspect ratio.", args: "--render-fit=stretched" },
+  { id: "rotate-90", label: "Rotate 90 degrees", desc: "Rotate the video by 90 degrees.", args: "--angle=90" },
+  { id: "force-adb-forward", label: "Force ADB forward", desc: "Always use ADB port forwarding for the video stream.", args: "--force-adb-forward" },
+  { id: "kill-adb-on-close", label: "Kill ADB on close", desc: "Stop the shared ADB server when scrcpy closes.", args: "--kill-adb-on-close" },
+  { id: "no-terminal-title", label: "No terminal title", desc: "Do not set the terminal window title.", args: "--no-terminal-title" },
+  { id: "print-fps", label: "Print FPS", desc: "Print the frame rate to the console.", args: "--print-fps" },
+  { id: "require-audio", label: "Require audio", desc: "Fail instead of continuing with video only when audio capture is unavailable.", args: "--require-audio" },
+  { id: "audio-dup", label: "Duplicate audio", desc: "Play the device audio on both the device and this computer (Android 13+).", args: "--audio-dup" },
+  { id: "no-key-repeat", label: "No key repeat", desc: "Disable key repeat for held keys.", args: "--no-key-repeat" },
+  { id: "no-mouse-hover", label: "No mouse hover", desc: "Do not move the device pointer when the mouse moves.", args: "--no-mouse-hover" },
+  { id: "raw-key-events", label: "Raw key events", desc: "Send raw key events instead of injected characters.", args: "--raw-key-events" },
+  { id: "prefer-text", label: "Prefer text", desc: "Prefer text injection over key events.", args: "--prefer-text" },
+  { id: "legacy-paste", label: "Legacy paste", desc: "Use the legacy clipboard paste method.", args: "--legacy-paste" },
+  { id: "no-downsize-on-error", label: "No downsize on error", desc: "Keep the original size if the encoder fails instead of downsizing.", args: "--no-downsize-on-error" },
+  { id: "no-clipboard-autosync", label: "No clipboard sync", desc: "Disable automatic clipboard synchronisation.", args: "--no-clipboard-autosync" },
+  { id: "disable-screensaver", label: "Disable screensaver", desc: "Prevent the computer screensaver from starting.", args: "--disable-screensaver" },
+  { id: "no-mipmaps", label: "No mipmaps", desc: "Disable mipmap generation (less GPU memory, sharper at odd sizes).", args: "--no-mipmaps" },
+  { id: "no-power-on", label: "No power on", desc: "Do not turn the device screen on when scrcpy starts.", args: "--no-power-on" },
+  { id: "screen-off-timer", label: "Screen-off timer (30 min)", desc: "Set the device screen-off timeout to 30 minutes while scrcpy runs (restored on exit).", args: "--screen-off-timeout=1800" }
 ];
 
 const TOOLKIT_DEVICE_COMMANDS = [
@@ -7135,7 +7143,15 @@ const TOOLKIT_APP_COMMANDS = [
 ];
 function enabledScriptArgs(config) {
   const enabled = config.scripts || {};
-  return SCRCPY_SCRIPTS.filter((script) => enabled[script.id]).map((script) => script.args).join(" ");
+  return SCRCPY_SCRIPTS.filter((script) => enabled[script.id] && script.args).map((script) => script.args).join(" ");
+}
+function enabledScriptOverrides(config) {
+  const enabled = config.scripts || {};
+  const overrides = {};
+  for (const script of SCRCPY_SCRIPTS) {
+    if (enabled[script.id] && script.set) Object.assign(overrides, script.set);
+  }
+  return overrides;
 }
 function launchForDevice(config, serial) {
   const profileId = serial ? config.deviceProfiles[serial] : "";
@@ -7147,6 +7163,7 @@ function launchForDevice(config, serial) {
   if (alias && !launch.windowTitle.trim()) launch.windowTitle = alias;
   const scriptArgs = enabledScriptArgs(config);
   if (scriptArgs) launch.extraArgs = [launch.extraArgs.trim(), scriptArgs].filter(Boolean).join("\n");
+  Object.assign(launch, enabledScriptOverrides(config));
   return launch;
 }
 function operationErrorMessage(result, fallback) {
@@ -7412,6 +7429,13 @@ const en = {
   audio: "Forward audio",
   turnScreenOff: "Turn device screen off",
   stayAwake: "Keep device awake",
+  displayOptions: "Display",
+  displayOptionsHint: "Screen, audio and rotation behaviour for this launch.",
+  keepScreenOff: "Keep screen off",
+  keepScreenOn: "Keep screen on",
+  audioForwarding: "Audio forwarding",
+  audioDuplication: "Audio duplication",
+  rotate90: "Rotate 90 degrees",
   showTouches: "Show touches",
   fullscreen: "Fullscreen",
   borderless: "Borderless window",
@@ -7498,7 +7522,7 @@ const en = {
   qrSuccess: "Paired with the device.",
   qrFailed: "QR pairing failed.",
   scripts: "Scripts",
-  scriptsHint: "Toggle preset argument packs. Enabled scripts are appended to the launch command, after the additional arguments above.",
+  scriptsHint: "Toggle preset argument packs. Enabled scripts are appended to the launch command, after the additional arguments above. A few presets set the matching GUI option instead of adding a flag.",
   muteNotifications: "Mute popup notifications",
   minimizeToTray: "Minimize to tray when closing the window",
   killAdbOnQuit: "Stop the shared ADB server when quitting",
@@ -8019,6 +8043,13 @@ const zhCN = {
   audio: "转发音频",
   turnScreenOff: "关闭设备屏幕",
   stayAwake: "保持设备唤醒",
+  displayOptions: "显示",
+  displayOptionsHint: "本次启动的屏幕、音频与旋转行为。",
+  keepScreenOff: "保持屏幕关闭",
+  keepScreenOn: "保持屏幕开启",
+  audioForwarding: "音频转发",
+  audioDuplication: "音频复制",
+  rotate90: "旋转 90 度",
   showTouches: "显示触摸位置",
   fullscreen: "全屏",
   borderless: "无边框窗口",
@@ -9482,7 +9513,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const query = appSearch.value.trim().toLocaleLowerCase();
       return installedApps.value.filter((item) => item.launchable && (showSystemApps.value || !item.system) && (!query || item.packageId.toLocaleLowerCase().includes(query) || item.label.toLocaleLowerCase().includes(query)));
     });
-    const settingsSections = ["general", "video", "controls", "recording", "geometry", "advanced", "panels"];
+    const settingsSections = ["general", "video", "recording", "geometry", "advanced", "panels"];
     const panelOrderDefault = ["devices", "toolkit", "automations", "sessions", "artifacts", "settings", "logs"];
     const panelVisibilityDefault = { devices: true, toolkit: true, automations: true, sessions: true, artifacts: true, settings: true, logs: true };
     const panelOrderAll = computed(() => {
@@ -9564,6 +9595,23 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       return features ? capabilityFeatureKeys.filter((feature) => features[feature]) : [];
     });
     const sceneKinds = ["screen", "camera", "virtual-display", "record-only", "control-only", "otg"];
+    const audioForward = computed({
+      get: () => config.launch.audioSource === "output",
+      set: (value) => {
+        config.launch.audioSource = value ? "output" : "default";
+        if (value) config.launch.audio = true;
+      }
+    });
+    const audioDuplication = computed({
+      get: () => config.launch.audioDup === true,
+      set: (value) => {
+        config.launch.audioDup = value;
+        if (value) {
+          config.launch.audio = true;
+          config.launch.audioSource = "playback";
+        }
+      }
+    });
     const sceneFeature = {
       screen: "screen",
       camera: "camera",
@@ -11406,6 +11454,88 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         ]
                       ])
                     ])
+                  ]),
+createBaseVNode("div", { class: "toggle-grid" }, [
+                  createBaseVNode("label", { class: "toggle" }, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": ($event) => config.swipePanel = $event,
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.swipePanel]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("showSwipePanel")), 1)
+                  ]),
+                  createBaseVNode("label", { class: "toggle" }, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": ($event) => config.navBar = $event,
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.navBar]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
+                  ])
+                ]),
+                                ])) : createCommentVNode("", true),
+                (config.launch.scene === "screen" || config.launch.scene === "virtual-display") ? (openBlock(), createElementBlock("section", { key: 6, class: "scene-form-card display-options" }, [
+                  createBaseVNode("div", null, [
+                    createBaseVNode("strong", null, toDisplayString(t("displayOptions")), 1),
+                    createBaseVNode("small", null, toDisplayString(t("displayOptionsHint")), 1)
+                  ]),
+                  createBaseVNode("div", { class: "toggle-grid" }, [
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => config.launch.turnScreenOff = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, config.launch.turnScreenOff]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("keepScreenOff")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => config.launch.stayAwake = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, config.launch.stayAwake]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("keepScreenOn")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => config.launch.fullscreen = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, config.launch.fullscreen]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("fullscreen")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => audioForward.value = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, audioForward.value]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("audioForwarding")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => audioDuplication.value = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, audioDuplication.value]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("audioDuplication")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle" }, [
+                      withDirectives(createBaseVNode("input", {
+                        "onUpdate:modelValue": ($event) => config.launch.rotation90 = $event,
+                        type: "checkbox"
+                      }, null, 512), [
+                        [vModelCheckbox, config.launch.rotation90]
+                      ]),
+                      createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
+                    ])
                   ])
                 ])) : createCommentVNode("", true),
                 config.launch.scene === "camera" ? (openBlock(), createElementBlock("section", _hoisted_46, [
@@ -11762,8 +11892,28 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     ], 512), [
                       [vModelSelect, config.launch.virtualDisplay.imePolicy]
                     ])
+                  ]),
+createBaseVNode("div", { class: "toggle-grid" }, [
+                  createBaseVNode("label", { class: "toggle" }, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": ($event) => config.swipePanel = $event,
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.swipePanel]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("showSwipePanel")), 1)
+                  ]),
+                  createBaseVNode("label", { class: "toggle" }, [
+                    withDirectives(createBaseVNode("input", {
+                      "onUpdate:modelValue": ($event) => config.navBar = $event,
+                      type: "checkbox"
+                    }, null, 512), [
+                      [vModelCheckbox, config.navBar]
+                    ]),
+                    createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
                   ])
-                ])) : createCommentVNode("", true),
+                ]),
+                                ])) : createCommentVNode("", true),
                 config.launch.scene === "record-only" ? (openBlock(), createElementBlock("section", _hoisted_85, [
                   createBaseVNode("div", null, [
                     createBaseVNode("div", _hoisted_86, [
@@ -14103,29 +14253,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   ])
                 ])
               ])) : createCommentVNode("", true),
-              activeSettingsSection.value === "controls" ? (openBlock(), createElementBlock("section", _hoisted_423, [
-                createBaseVNode("h2", null, toDisplayString(t("behavior")), 1),
-                createBaseVNode("div", _hoisted_424, [
-                  createBaseVNode("label", { class: "toggle" }, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": ($event) => config.swipePanel = $event,
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.swipePanel]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("showSwipePanel")), 1)
-                  ]),
-                  createBaseVNode("label", { class: "toggle" }, [
-                    withDirectives(createBaseVNode("input", {
-                      "onUpdate:modelValue": ($event) => config.navBar = $event,
-                      type: "checkbox"
-                    }, null, 512), [
-                      [vModelCheckbox, config.navBar]
-                    ]),
-                    createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
-                  ]),
-                ])
-              ])) : createCommentVNode("", true),
               activeSettingsSection.value === "recording" ? (openBlock(), createElementBlock("section", _hoisted_435, [
                 createBaseVNode("h2", null, toDisplayString(t("recording")), 1),
                 createBaseVNode("label", _hoisted_436, [
@@ -14803,14 +14930,17 @@ createBaseVNode("div", { class: "toolkit-section" }, [
               createBaseVNode("p", { class: "muted" }, toDisplayString(t("scriptsHint")), 1),
               createBaseVNode("div", { class: "tk-scripts" }, [
                 (openBlock(true), createElementBlock(Fragment, null, renderList(SCRCPY_SCRIPTS, (script) => {
-                  return openBlock(), createElementBlock("label", { key: script.id, class: "toggle" }, [
+                  return openBlock(), createElementBlock("label", { key: script.id, class: "toggle tk-script" }, [
                     withDirectives(createBaseVNode("input", {
                       "onUpdate:modelValue": ($event) => config.scripts[script.id] = $event,
                       type: "checkbox"
                     }, null, 512), [
                       [vModelCheckbox, config.scripts[script.id]]
                     ]),
-                    createBaseVNode("span", { title: script.args }, toDisplayString(script.label), 1)
+                    createBaseVNode("span", { class: "tk-script-copy", title: script.args || "" }, [
+                      createBaseVNode("strong", null, toDisplayString(script.label), 1),
+                      createBaseVNode("small", null, toDisplayString(script.desc), 1)
+                    ], 8, ["title"])
                   ]);
                 }), 128))
               ])
