@@ -7382,8 +7382,7 @@ const en = {
   pairingCode: "6-digit pairing code",
   connect: "Connect",
   pair: "Pair",
-  legacyWirelessEyebrow: "Android 10 and below",
-  legacyWirelessLabel: "Enable wireless ADB over the USB connection.",
+  legacyWirelessLabel: "Android 10 and below: enable wireless ADB over the USB connection.",
   legacyWirelessReadyHint: "Ready — Android {version} over USB.",
   enableLegacyWireless: "Enable wireless ADB",
   legacyWirelessEnabled: "Wireless ADB enabled",
@@ -12694,12 +12693,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }, toDisplayString(qrBusy.value ? t("qrWaiting") : t("qrPair")), 9, ["disabled"])) : createCommentVNode("", true)
                 ]),
                 createBaseVNode("div", { class: "legacy-wireless" }, [
-                  createBaseVNode("div", { class: "panel-title" }, [
-                    createBaseVNode("div", null, [
-                      createBaseVNode("p", { class: "eyebrow" }, toDisplayString(t("legacyWirelessEyebrow")), 1),
-                      createBaseVNode("p", { class: "muted" }, toDisplayString(t("legacyWirelessLabel")), 1)
-                    ])
-                  ]),
+                  createBaseVNode("p", { class: "muted legacy-wireless-label" }, toDisplayString(t("legacyWirelessLabel")), 1),
                   createBaseVNode("div", { class: "legacy-wireless-row" }, [
                     createBaseVNode("button", {
                       class: "secondary",
