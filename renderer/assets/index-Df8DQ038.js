@@ -11239,12 +11239,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               onClick: openGithub
             }, toDisplayString(t("openGithub")), 1)
           ]),
-          createBaseVNode("button", {
-            class: "icon-button sidebar-toggle",
-            type: "button",
-            title: t("toggleSidebar"),
-            onClick: () => sidebarCollapsed.value = !sidebarCollapsed.value
-          }, toDisplayString(sidebarCollapsed.value ? "❯" : "❮"), 1)
         ]),
         createBaseVNode("aside", _hoisted_2, [
           createBaseVNode("nav", _hoisted_3, [
@@ -11260,6 +11254,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }), 128))
           ]),
         ]),
+        createBaseVNode("button", {
+          class: "sidebar-toggle-tab",
+          type: "button",
+          title: t("toggleSidebar"),
+          onClick: () => sidebarCollapsed.value = !sidebarCollapsed.value
+        }, toDisplayString(sidebarCollapsed.value ? "❯" : "❮"), 1),
         createBaseVNode("main", null, [
           activeTab.value === "devices" ? (openBlock(), createElementBlock("section", _hoisted_8, [
             createBaseVNode("div", _hoisted_9, [
@@ -11498,7 +11498,7 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                     ]),
                     createBaseVNode("span", null, toDisplayString(t("showNavBar")), 1)
                   ])
-                ,
+                ]),
                 createBaseVNode("div", { class: "display-options-inline" }, [
                   createBaseVNode("div", null, [
                     createBaseVNode("strong", null, toDisplayString(t("displayOptions")), 1),
@@ -11534,8 +11534,8 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                       createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
                     ])
                   ])
-                ])]),
-                                ])) : createCommentVNode("", true),,
+                ]),
+                                ])) : createCommentVNode("", true),
                 config.launch.scene === "virtual-display" ? (openBlock(), createElementBlock("section", { class: "scene-form-card" }, [
                   createBaseVNode("div", null, [
                     createBaseVNode("strong", null, toDisplayString(t("virtualDisplayLifecycle")), 1),
@@ -11543,11 +11543,11 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                   ]),
                   createBaseVNode("div", { class: "toggle-grid" }, [
                     createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDecorationsDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.virtualDisplay.systemDecorations = !$event, type: "checkbox" }, null, 512), [ [vModelCheckbox, !config.virtualDisplay.systemDecorations] ]),
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.systemDecorations = !$event, type: "checkbox" }, null, 512), [ [vModelCheckbox, !config.launch.virtualDisplay.systemDecorations] ]),
                       createBaseVNode("span", null, toDisplayString(t("virtualDisplayDecorations")), 1)
                     ]),
                     createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDestroyDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.virtualDisplay.destroyContent = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.virtualDisplay.destroyContent] ]),
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.destroyContent = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.virtualDisplay.destroyContent] ]),
                       createBaseVNode("span", null, toDisplayString(t("virtualDisplayDestroy")), 1)
                     ]),
                     createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOffDesc") }, [
@@ -11579,8 +11579,7 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                       createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
                     ])
                   ])
-                ])) : createCommentVNode("", true)
-                ,
+                ])) : createCommentVNode("", true),
                 config.launch.scene === "camera" ? (openBlock(), createElementBlock("section", _hoisted_46, [
                   createBaseVNode("div", null, [
                     createBaseVNode("strong", null, toDisplayString(t("cameraSource")), 1),
@@ -14482,9 +14481,6 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                     ]),
                     createBaseVNode("span", null, toDisplayString(t("control")), 1)
                   ]),
-                  ,
-                  ,
-                  ,
                   createBaseVNode("label", _hoisted_430, [
                     withDirectives(createBaseVNode("input", {
                       "onUpdate:modelValue": _cache[126] || (_cache[126] = ($event) => config.launch.showTouches = $event),
@@ -14494,8 +14490,6 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                     ]),
                     createBaseVNode("span", null, toDisplayString(t("showTouches")), 1)
                   ]),
-                  ,
-                  ,
                   createBaseVNode("label", _hoisted_433, [
                     withDirectives(createBaseVNode("input", {
                       "onUpdate:modelValue": _cache[129] || (_cache[129] = ($event) => config.launch.windowAspectRatioLock = $event),
@@ -14536,11 +14530,11 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                     }, null, 512), [
                       [vModelCheckbox, config.accentReversed]
                     ]),
-                    createBaseVNode("span", null, toDisplayString(t("accentReversed"),
+                    createBaseVNode("span", null, toDisplayString(t("accentReversed")), 1)
+                  ]),
                   createBaseVNode("label", { class: "toggle", "data-tip": t("autoSelectFirstDesc") }, [
                     withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.autoSelectFirstDevice = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.autoSelectFirstDevice] ]),
                     createBaseVNode("span", null, toDisplayString(t("autoSelectFirst")), 1)
-                  ])), 1)
                   ])
                 ]),
                 createBaseVNode("label", null, [

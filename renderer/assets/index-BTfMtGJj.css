@@ -393,57 +393,41 @@ input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px var(--focus-ring); 
 /* Display options card: 2-column toggle grid so all six labels fit the scene-form column */
 .display-options .toggle-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-/* Sidebar toggle as vertical tab on sidebar edge (manila folder style) */
+/* Sidebar collapse tab (manila folder style, docked to the sidebar's top-right edge) */
 .sidebar-toggle-tab {
   position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: center;
-  z-index: 1000;
-  width: 32px;
-  height: 32px;
+  top: 96px;
+  left: 218px;
+  z-index: 30;
+  width: 20px;
+  height: 44px;
   padding: 0;
-  border-radius: 8px 8px 0 0;
-  font-size: 12px;
-  line-height: 1;
-  background: var(--panel);
   border: 1px solid var(--border);
-  border-right: none;
-  box-shadow: -2px 0 8px var(--shadow-md);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background: var(--topbar-bg);
   color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: background .2s, color .2s;
 }
 .sidebar-toggle-tab:hover {
   background: var(--panel-hover);
   color: var(--text);
-  box-shadow: -4px 0 12px var(--shadow-lg);
 }
 .sidebar-toggle-tab:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 .app-shell.sidebar-collapsed .sidebar-toggle-tab {
-  right: 0;
-  border-radius: 8px 0 0 8px;
-  border-right: 1px solid var(--border);
-  border-left: none;
-  box-shadow: 2px 0 8px var(--shadow-md);
-}
-.app-shell.sidebar-collapsed .sidebar-toggle-tab:hover {
-  box-shadow: 4px 0 12px var(--shadow-lg);
-}
-/* Hide the original sidebar-toggle in header */
-.app-header .sidebar-toggle {
-  display: none;
-}
-/* Ensure aside (sidebar) has room for the tab */
-.topbar {
-  position: relative;
+  left: 0;
+  border-left: 1px solid var(--border);
+  border-right: none;
+  border-radius: 0 6px 6px 0;
 }
 
 /* Hover tooltip for toggles */
@@ -491,6 +475,7 @@ input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px var(--focus-ring); 
   gap: 7px;
 }
 @media (max-width: 980px) {
+  .sidebar-toggle-tab { left: 190px; }
   .scene-form-card .display-options-inline .toggle-grid {
     grid-template-columns: 1fr;
   }

@@ -46,7 +46,8 @@ const SCENE_MANAGED_FLAGS = [
   ["-x", "flexDisplay"],
   ["--start-app", "startApp"],
   ["--keep-active", "keepActive"],
-  ["--display-ime-policy", "displayImePolicy"]
+  ["--display-ime-policy", "displayImePolicy"],
+  ["--window-borderless", "borderless"]
 ];
 const VISUAL_SCENES = /* @__PURE__ */ new Set(["screen", "camera", "virtual-display", "record-only"]);
 const PACKAGE_ID$1 = /^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$/;

@@ -18,7 +18,7 @@ A custom build of the [Scrcpy GUI](https://github.com/SimonAKing/scrcpy-gui) (v2
 - **Updater** — checks and applies updates for the app itself (GitHub releases), bundled scrcpy and bundled adb, and can rebuild the AppImage in place.
 - **Config export** — Settings → General: JSON, `.sh`, `.bat` or `.command`.
 - **Settings → Panels** — drag to reorder the sidebar panels, toggle any panel's visibility, or reset to the defaults. Your layout persists across restarts.
-- **Collapsible sidebar**, collapsible panels, app labels beside package names.
+- **Collapsible sidebar** with a manila-folder tab on its edge (always visible, open or collapsed), collapsible panels, app labels beside package names.
 
 ## Requirements
 

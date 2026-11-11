@@ -41,8 +41,8 @@ A stable maintenance release of the **Ultimate Scrcpy** custom build — a fork 
 ## Install
 
 ```bash
-chmod +x UltimateSCRCPYGui-1.1.1.AppImage
-./UltimateSCRCPYGui-1.1.1.AppImage
+chmod +x UltimateSCRCPYGui-1.1.2.AppImage
+./UltimateSCRCPYGui-1.1.2.AppImage
 ```
 
 Settings are stored in `~/.config/UltimateSCRCPYGui/`.
