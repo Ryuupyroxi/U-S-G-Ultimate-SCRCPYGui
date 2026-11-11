@@ -11536,50 +11536,6 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                   ])
                 ]),
                                 ])) : createCommentVNode("", true),
-                config.launch.scene === "virtual-display" ? (openBlock(), createElementBlock("section", { class: "scene-form-card" }, [
-                  createBaseVNode("div", null, [
-                    createBaseVNode("strong", null, toDisplayString(t("virtualDisplayLifecycle")), 1),
-                    createBaseVNode("small", null, toDisplayString(t("virtualDisplayLifecycleHint")), 1)
-                  ]),
-                  createBaseVNode("div", { class: "toggle-grid" }, [
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDecorationsDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.systemDecorations = !$event, type: "checkbox" }, null, 512), [ [vModelCheckbox, !config.launch.virtualDisplay.systemDecorations] ]),
-                      createBaseVNode("span", null, toDisplayString(t("virtualDisplayDecorations")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDestroyDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.destroyContent = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.virtualDisplay.destroyContent] ]),
-                      createBaseVNode("span", null, toDisplayString(t("virtualDisplayDestroy")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOffDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.turnScreenOff = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.turnScreenOff] ]),
-                      createBaseVNode("span", null, toDisplayString(t("keepScreenOff")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOnDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.stayAwake = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.stayAwake] ]),
-                      createBaseVNode("span", null, toDisplayString(t("keepScreenOn")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("fullscreenDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.fullscreen = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.fullscreen] ]),
-                      createBaseVNode("span", null, toDisplayString(t("fullscreen")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("borderlessDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.borderless = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.borderless] ]),
-                      createBaseVNode("span", null, toDisplayString(t("borderless")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("audioForwardingDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => audioForward.value = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, audioForward.value] ]),
-                      createBaseVNode("span", null, toDisplayString(t("audioForwarding")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("audioDuplicationDesc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => audioDuplication.value = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, audioDuplication.value] ]),
-                      createBaseVNode("span", null, toDisplayString(t("audioDuplication")), 1)
-                    ]),
-                    createBaseVNode("label", { class: "toggle", "data-tip": t("rotate90Desc") }, [
-                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.rotation90 = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.rotation90] ]),
-                      createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
-                    ])
-                  ])
-                ])) : createCommentVNode("", true),
                 config.launch.scene === "camera" ? (openBlock(), createElementBlock("section", _hoisted_46, [
                   createBaseVNode("div", null, [
                     createBaseVNode("strong", null, toDisplayString(t("cameraSource")), 1),
@@ -11887,23 +11843,13 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                     ])
                   ]),
                   createBaseVNode("div", _hoisted_78, [
-                    createBaseVNode("label", _hoisted_79, [
-                      withDirectives(createBaseVNode("input", {
-                        "onUpdate:modelValue": _cache[30] || (_cache[30] = ($event) => config.launch.virtualDisplay.systemDecorations = $event),
-                        type: "checkbox"
-                      }, null, 512), [
-                        [vModelCheckbox, config.launch.virtualDisplay.systemDecorations]
-                      ]),
-                      createBaseVNode("span", null, toDisplayString(t("systemDecorations")), 1)
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDecorationsDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.systemDecorations = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.virtualDisplay.systemDecorations] ]),
+                      createBaseVNode("span", null, toDisplayString(t("virtualDisplayDecorations")), 1)
                     ]),
-                    createBaseVNode("label", _hoisted_80, [
-                      withDirectives(createBaseVNode("input", {
-                        "onUpdate:modelValue": _cache[31] || (_cache[31] = ($event) => config.launch.virtualDisplay.destroyContent = $event),
-                        type: "checkbox"
-                      }, null, 512), [
-                        [vModelCheckbox, config.launch.virtualDisplay.destroyContent]
-                      ]),
-                      createBaseVNode("span", null, toDisplayString(t("destroyContent")), 1)
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("virtualDisplayDestroyDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.virtualDisplay.destroyContent = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.virtualDisplay.destroyContent] ]),
+                      createBaseVNode("span", null, toDisplayString(t("virtualDisplayDestroy")), 1)
                     ]),
                     createBaseVNode("label", _hoisted_82, [
                       withDirectives(createBaseVNode("input", {
@@ -11922,6 +11868,34 @@ createBaseVNode("div", { class: "toggle-grid" }, [
                         [vModelCheckbox, config.launch.virtualDisplay.flexDisplay]
                       ]),
                       createBaseVNode("span", null, toDisplayString(t("flexDisplay")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOffDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.turnScreenOff = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.turnScreenOff] ]),
+                      createBaseVNode("span", null, toDisplayString(t("keepScreenOff")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("keepScreenOnDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.stayAwake = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.stayAwake] ]),
+                      createBaseVNode("span", null, toDisplayString(t("keepScreenOn")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("fullscreenDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.fullscreen = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.fullscreen] ]),
+                      createBaseVNode("span", null, toDisplayString(t("fullscreen")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("borderlessDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.borderless = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.borderless] ]),
+                      createBaseVNode("span", null, toDisplayString(t("borderless")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("audioForwardingDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => audioForward.value = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, audioForward.value] ]),
+                      createBaseVNode("span", null, toDisplayString(t("audioForwarding")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("audioDuplicationDesc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => audioDuplication.value = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, audioDuplication.value] ]),
+                      createBaseVNode("span", null, toDisplayString(t("audioDuplication")), 1)
+                    ]),
+                    createBaseVNode("label", { class: "toggle", "data-tip": t("rotate90Desc") }, [
+                      withDirectives(createBaseVNode("input", { "onUpdate:modelValue": ($event) => config.launch.rotation90 = $event, type: "checkbox" }, null, 512), [ [vModelCheckbox, config.launch.rotation90] ]),
+                      createBaseVNode("span", null, toDisplayString(t("rotate90")), 1)
                     ])
                   ]),
                   createBaseVNode("label", null, [
