@@ -142,7 +142,7 @@ input, select { height: 38px; padding: 0 10px; }textarea { padding: 10px; line-h
 .recording-status-device { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recording-duration { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; flex-shrink: 0; }
 .legacy-wireless { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }.legacy-wireless .panel-title { gap: 0; }
-.legacy-wireless-label { margin: 0; font-weight: 700; color: var(--text-muted); max-width: 720px; }
+.legacy-wireless-label { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-muted); max-width: 720px; }
 .legacy-wireless-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .legacy-wireless-status { margin: 0; font-size: 11px; }
 .legacy-wireless .secondary { flex: 0 0 auto; }
